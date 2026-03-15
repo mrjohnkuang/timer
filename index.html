@@ -5,126 +5,124 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Francisco Middle School Schedule &amp; Timer</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
-.app { display: flex; height: 100vh; overflow: hidden; }
-.sidebar { width: 260px; min-width: 260px; background: #fff; border-right: 1px solid #e5e5e5; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; transition: width 0.2s, min-width 0.2s; }
-.sidebar-top { padding: 14px 16px 10px; border-bottom: 1px solid #f0f0f0; }
-.sidebar-time { font-size: 22px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.5px; margin-bottom: 2px; font-variant-numeric: tabular-nums; }
-.sidebar-date { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-.week-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-.week-badge.regular  { background: #ede9fe; color: #4f46e5; }
-.week-badge.special  { background: #fef3c7; color: #92400e; }
-.week-badge.noschool { background: #fee2e2; color: #991b1b; }
-.week-badge.override { background: #f5f3ff; color: #7c3aed; }
-.period-list { flex: 1; overflow-y: auto; padding: 6px 0; }
-.period-item { display: flex; align-items: center; gap: 9px; padding: 8px 16px; border-left: 3px solid transparent; }
-.period-item.past    { opacity: 0.38; }
-.period-item.current { border-left-color: #4f46e5; background: #f5f4ff; }
-.period-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
-.period-item.current .period-dot { background: #4f46e5; }
-.period-item.lunch   .period-dot { background: #f59e0b; }
-.period-name { font-size: 13px; font-weight: 500; flex: 1; }
-.period-time { font-size: 11px; color: #aaa; white-space: nowrap; }
-.no-periods  { padding: 20px 16px; text-align: center; color: #bbb; font-size: 13px; line-height: 1.6; }
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-.topbar { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 10px 18px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; flex-shrink: 0; }
-.day-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid #e0e0e0; background: #fff; font-size: 13px; cursor: pointer; color: #555; }
-.day-btn.active   { background: #4f46e5; color: #fff; border-color: #4f46e5; }
-.day-btn.noschool { border-color: #fca5a5; color: #991b1b; background: #fff5f5; }
-.day-btn.active.noschool { background: #dc2626; border-color: #dc2626; color: #fff; }
-.spacer { flex: 1; }
-.topbar-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid #e0e0e0; background: #fff; font-size: 13px; cursor: pointer; color: #555; white-space: nowrap; }
-.topbar-btn.active-state { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; }
-.topbar-btn.warn  { border-color: #f59e0b; color: #b45309; background: #fffbeb; }
-.topbar-btn.setup { border-color: #4f46e5; color: #4f46e5; background: #f5f4ff; }
-.topbar-btn.proj-on { border-color: #059669; color: #059669; background: #ecfdf5; }
-.custom-timer-bar { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: #fff; border-bottom: 1px solid #e5e5e5; flex-wrap: wrap; flex-shrink: 0; }
-.custom-timer-bar.hidden { display: none; }
-.ct-label { font-size: 13px; font-weight: 500; color: #555; min-width: 80px; }
-.ct-input { padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
-.ct-btn { padding: 5px 12px; border-radius: 6px; border: 1px solid #e0e0e0; background: #fff; font-size: 13px; cursor: pointer; color: #555; }
-.ct-btn.primary { background: #4f46e5; color: #fff; border-color: #4f46e5; }
-.ct-btn.stop    { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
-.ct-btn.pause   { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
-.ct-status { font-size: 13px; color: #aaa; }
-.ct-spacer { flex: 1; }
-.timer-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 24px; overflow: hidden; }
-.sim-banner { background: #f5f3ff; border: 1px solid #c4b5fd; border-radius: 8px; padding: 6px 14px; font-size: 12px; color: #7c3aed; margin-bottom: 12px; text-align: center; flex-shrink: 0; }
-.timer-layout { display: flex; flex-direction: column; align-items: center; width: 100%; }
-.proj-clock { display: none; font-variant-numeric: tabular-nums; font-weight: 700; color: #fff; text-align: center; margin-bottom: 8px; flex-shrink: 0; }
-.period-label { font-size: 13px; color: #aaa; margin-bottom: 4px; text-align: center; flex-shrink: 0; }
-.period-title { font-weight: 700; color: #1a1a1a; margin-bottom: 2px; text-align: center; flex-shrink: 0; }
-.time-range   { font-size: 12px; color: #bbb; margin-bottom: 16px; flex-shrink: 0; }
-.rings-row { display: flex; gap: 24px; align-items: center; justify-content: center; flex-wrap: wrap; }
-.ring-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.ring-wrap { position: relative; flex-shrink: 0; }
-.ring-fill { fill: none; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ring-cd { font-weight: 700; letter-spacing: -0.5px; color: #4f46e5; font-variant-numeric: tabular-nums; line-height: 1; }
-.ring-cd.urgent      { color: #dc2626; }
-.ring-cd.lunch-color { color: #f59e0b; }
-.ring-cd.day-color   { color: #818cf8; }
-.ring-cd.passing     { color: #0891b2; }
-.ring-cd.custom-timer{ color: #059669; }
-.next-up { font-size: 13px; color: #aaa; text-align: center; margin-top: 8px; flex-shrink: 0; }
-.next-up strong { color: #666; }
-/* Projector */
-body.projector { background: #0f0f14; color: #fff; }
-body.projector .main   { background: #0f0f14; }
-body.projector .topbar { background: #1a1a24; border-color: #2a2a38; }
-body.projector .day-btn { background: #1a1a24; border-color: #2a2a38; color: #aaa; }
-body.projector .day-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
-body.projector .topbar-btn { background: #1a1a24; border-color: #2a2a38; color: #aaa; }
-body.projector .topbar-btn.proj-on { border-color: #059669; color: #34d399; background: #022c22; }
-body.projector .custom-timer-bar { background: #1a1a24; border-color: #2a2a38; }
-body.projector .ct-label { color: #aaa; }
-body.projector .ct-input { background: #0f0f14; border-color: #2a2a38; color: #fff; }
-body.projector .ct-status { color: #555; }
-body.projector .ct-btn { background: #1a1a24; border-color: #2a2a38; color: #aaa; }
-body.projector .ct-btn.primary { background: #4f46e5; color: #fff; }
-body.projector .ct-btn.stop { background: #2c0a0a; color: #fca5a5; }
-body.projector .ct-btn.pause { background: #1c1400; color: #fcd34d; }
-body.projector .timer-area { background: #0f0f14; }
-body.projector .period-label { color: #555; }
-body.projector .period-title { color: #fff; }
-body.projector .time-range   { color: #444; }
-body.projector .next-up { color: #444; }
-body.projector .next-up strong { color: #777; }
-body.projector .proj-clock { display: block; }
-body.projector .sim-banner { background: #1a1524; border-color: #4c1d95; color: #a78bfa; }
-/* Modals */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 200; }
-.modal    { background: #fff; border-radius: 12px; width: 640px; max-width: 96vw; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; }
-.modal-sm { width: 460px; }
-.modal-header { padding: 14px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.modal-header h3 { font-size: 15px; font-weight: 600; }
-.modal-header .step-ind { font-size: 12px; color: #aaa; }
-.modal-close  { background: none; border: none; font-size: 22px; cursor: pointer; color: #bbb; line-height: 1; }
-.modal-body   { flex: 1; overflow-y: auto; padding: 16px 20px; }
-.modal-footer { padding: 12px 20px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px; align-items: center; flex-shrink: 0; }
-.btn-primary   { padding: 7px 18px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.btn-secondary { padding: 7px 18px; background: #fff; color: #555; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.btn-danger    { padding: 7px 18px; background: #fff; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; font-size: 13px; cursor: pointer; margin-right: auto; }
-.section-label { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 14px; }
-.section-label:first-child { margin-top: 0; }
-.info-box { background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #888; margin-bottom: 12px; line-height: 1.6; }
-.tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tpl-card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
-.tpl-card:hover    { border-color: #4f46e5; background: #f5f4ff; }
-.tpl-card.selected { border-color: #4f46e5; background: #f5f4ff; }
-.tpl-card h4 { font-size: 13px; font-weight: 600; }
-.sim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.sim-row label { font-size: 13px; color: #555; width: 70px; flex-shrink: 0; }
-.sim-row input  { padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; flex: 1; }
-.setup-textarea { width: 100%; min-height: 200px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; font-family: monospace; resize: vertical; line-height: 1.6; }
-.setup-textarea:focus { outline: none; border-color: #4f46e5; }
-.progress-steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.progress-step { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-.progress-step.done    { background: #d1fae5; color: #065f46; }
-.progress-step.current { background: #4f46e5; color: #fff; }
-.progress-step.pending { background: #f3f4f6; color: #9ca3af; }
-.parse-error { color: #dc2626; font-size: 12px; margin-top: 6px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh;}
+.app{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:260px;min-width:260px;background:#fff;border-right:1px solid #e5e5e5;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.sidebar-top{padding:14px 16px 10px;border-bottom:1px solid #f0f0f0;}
+.sidebar-time{font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.5px;margin-bottom:2px;font-variant-numeric:tabular-nums;}
+.sidebar-date{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;}
+.week-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.week-badge.regular{background:#ede9fe;color:#4f46e5;}
+.week-badge.special{background:#fef3c7;color:#92400e;}
+.week-badge.noschool{background:#fee2e2;color:#991b1b;}
+.week-badge.override{background:#f5f3ff;color:#7c3aed;}
+.period-list{flex:1;overflow-y:auto;padding:6px 0;}
+.period-item{display:flex;align-items:center;gap:9px;padding:8px 16px;border-left:3px solid transparent;}
+.period-item.past{opacity:0.38;}
+.period-item.current{border-left-color:#4f46e5;background:#f5f4ff;}
+.period-dot{width:7px;height:7px;border-radius:50%;background:#ddd;flex-shrink:0;}
+.period-item.current .period-dot{background:#4f46e5;}
+.period-item.lunch .period-dot{background:#f59e0b;}
+.period-name{font-size:13px;font-weight:500;flex:1;}
+.period-time{font-size:11px;color:#aaa;white-space:nowrap;}
+.no-periods{padding:20px 16px;text-align:center;color:#bbb;font-size:13px;line-height:1.6;}
+.sidebar-day-header{padding:6px 16px 4px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;margin-top:4px;border-radius:0;}
+.sidebar-day-header:first-child{margin-top:0;}
+.sidebar-day-header:hover{color:#4f46e5;}
+.sidebar-day-selected{color:#4f46e5!important;border-left:3px solid #4f46e5;}
+.sidebar-no-school{padding:4px 16px 8px;font-size:12px;color:#bbb;font-style:italic;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{background:#fff;border-bottom:1px solid #e5e5e5;padding:10px 18px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex-shrink:0;}
+.day-btn{padding:5px 12px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;font-size:13px;cursor:pointer;color:#555;}
+.day-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e5;}
+.day-btn.noschool{border-color:#fca5a5;color:#991b1b;background:#fff5f5;}
+.day-btn.active.noschool{background:#dc2626;border-color:#dc2626;color:#fff;}
+.spacer{flex:1;}
+.topbar-btn{padding:5px 12px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;font-size:13px;cursor:pointer;color:#555;white-space:nowrap;}
+.topbar-btn.active-state{border-color:#7c3aed;color:#7c3aed;background:#f5f3ff;}
+.topbar-btn.warn{border-color:#f59e0b;color:#b45309;background:#fffbeb;}
+.topbar-btn.setup{border-color:#4f46e5;color:#4f46e5;background:#f5f4ff;}
+.topbar-btn.proj-on{border-color:#059669;color:#059669;background:#ecfdf5;}
+.ct-bar{display:flex;align-items:center;gap:10px;padding:10px 18px;background:#fff;border-bottom:1px solid #e5e5e5;flex-wrap:wrap;flex-shrink:0;}
+.ct-bar.hidden{display:none;}
+.ct-input{padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;}
+.ct-btn{padding:5px 12px;border-radius:6px;border:1px solid #e0e0e0;background:#fff;font-size:13px;cursor:pointer;color:#555;}
+.ct-btn.primary{background:#4f46e5;color:#fff;border-color:#4f46e5;}
+.ct-btn.stop{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
+.ct-btn.pause{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
+.timer-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 20px;overflow-y:auto;min-height:0;}
+.sim-banner{background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:6px 14px;font-size:12px;color:#7c3aed;margin-bottom:8px;text-align:center;flex-shrink:0;}
+.timer-layout{display:flex;flex-direction:column;align-items:center;width:100%;gap:2px;}
+.proj-clock{font-variant-numeric:tabular-nums;font-weight:700;text-align:center;}
+.rings-row{display:flex;gap:20px;align-items:flex-start;justify-content:center;}
+.ring-block{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.ring-wrap{position:relative;flex-shrink:0;}
+.ring-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-cd{font-weight:700;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;line-height:1;}
+.ring-cd.urgent{color:#dc2626;}
+.ring-cd.lunch-color{color:#f59e0b;}
+.ring-cd.day-color{color:#818cf8;}
+.ring-cd.passing{color:#0891b2;}
+.ring-cd.custom-timer{color:#059669;}
+.next-up{font-size:13px;color:#aaa;text-align:center;}
+.next-up strong{color:#666;}
+body.projector{background:#0f0f14;color:#fff;}
+body.projector .main{background:#0f0f14;}
+body.projector .topbar{background:#1a1a24;border-color:#2a2a38;}
+body.projector .ct-bar{background:#1a1a24;border-color:#2a2a38;}
+body.projector .ct-input{background:#0f0f14;border-color:#2a2a38;color:#fff;}
+body.projector .ct-btn{background:#1a1a24;border-color:#2a2a38;color:#aaa;}
+body.projector .ct-btn.primary{background:#4f46e5;color:#fff;}
+body.projector .ct-btn.stop{background:#2c0a0a;color:#fca5a5;}
+body.projector .ct-btn.pause{background:#1c1400;color:#fcd34d;}
+body.projector .day-btn{background:#1a1a24;border-color:#2a2a38;color:#aaa;}
+body.projector .day-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e5;}
+body.projector .topbar-btn{background:#1a1a24;border-color:#2a2a38;color:#aaa;}
+body.projector .topbar-btn.proj-on{border-color:#059669;color:#34d399;background:#022c22;}
+body.projector .timer-area{background:#0f0f14;}
+.period-label{font-size:13px;color:#aaa;text-align:center;}
+.period-title{font-weight:700;color:#1a1a1a;text-align:center;}
+.time-range{font-size:12px;color:#bbb;margin-bottom:4px;}
+body.projector .proj-clock{color:#fff;}
+body:not(.projector) .proj-clock{color:#1a1a1a;}
+body.projector .period-title{color:#fff;}
+body.projector .time-range{color:#444;}
+body.projector .next-up{color:#444;}
+body.projector .next-up strong{color:#777;}
+body.projector .proj-clock{display:block;}
+body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:200;}
+.modal{background:#fff;border-radius:12px;width:640px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-sm{width:460px;}
+.modal-header{padding:14px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-header h3{font-size:15px;font-weight:600;}
+.step-ind{font-size:12px;color:#aaa;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:#bbb;line-height:1;}
+.modal-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.modal-footer{padding:12px 20px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;align-items:center;flex-shrink:0;}
+.btn-primary{padding:7px 18px;background:#4f46e5;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;}
+.btn-secondary{padding:7px 18px;background:#fff;color:#555;border:1px solid #ddd;border-radius:6px;font-size:13px;cursor:pointer;}
+.btn-danger{padding:7px 18px;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;font-size:13px;cursor:pointer;margin-right:auto;}
+.section-label{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;margin-top:14px;}
+.section-label:first-child{margin-top:0;}
+.info-box{background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:10px 14px;font-size:12px;color:#888;margin-bottom:12px;line-height:1.6;}
+.tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tpl-card{border:1px solid #e5e5e5;border-radius:8px;padding:10px 14px;cursor:pointer;}
+.tpl-card:hover,.tpl-card.selected{border-color:#4f46e5;background:#f5f4ff;}
+.tpl-card h4{font-size:13px;font-weight:600;}
+.sim-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.sim-row label{font-size:13px;color:#555;width:70px;flex-shrink:0;}
+.sim-row input{padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;flex:1;}
+.setup-textarea{width:100%;min-height:200px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:monospace;resize:vertical;line-height:1.6;}
+.setup-textarea:focus{outline:none;border-color:#4f46e5;}
+.progress-steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.progress-step{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;}
+.progress-step.done{background:#d1fae5;color:#065f46;}
+.progress-step.current{background:#4f46e5;color:#fff;}
+.progress-step.pending{background:#f3f4f6;color:#9ca3af;}
+.parse-error{color:#dc2626;font-size:12px;margin-top:6px;}
 </style>
 </head>
 <body>
@@ -138,39 +136,39 @@ body.projector .sim-banner { background: #1a1524; border-color: #4c1d95; color: 
     <div class="period-list" id="period-list"></div>
   </div>
   <div class="main">
-    <div class="topbar">
+    <div class="topbar" id="topbar">
       <button class="day-btn" data-day="0">Mon</button>
       <button class="day-btn" data-day="1">Tue</button>
       <button class="day-btn" data-day="2">Wed</button>
       <button class="day-btn" data-day="3">Thu</button>
       <button class="day-btn" data-day="4">Fri</button>
       <div class="spacer"></div>
-      <button class="topbar-btn" id="proj-btn"      onclick="toggleProjector()">Projector</button>
+      <button class="topbar-btn" id="proj-btn" onclick="toggleProjector()">Projector</button>
       <button class="topbar-btn" id="ct-toggle-btn" onclick="toggleCtBar()">+ Timer</button>
-      <button class="topbar-btn" id="sim-btn"       onclick="openSim()">Simulate</button>
-      <button class="topbar-btn" id="override-btn"  onclick="openOverride()">Week override</button>
-      <button class="topbar-btn setup"              onclick="openSetup()">Setup</button>
+      <button class="topbar-btn" id="sim-btn" onclick="openSim()">Simulate</button>
+      <button class="topbar-btn" id="override-btn" onclick="openOverride()">Week override</button>
+      <button class="topbar-btn setup" onclick="openSetup()">Setup</button>
     </div>
-    <div class="custom-timer-bar hidden" id="ct-bar">
-      <span class="ct-label">Custom timer</span>
+    <div class="ct-bar hidden" id="ct-bar">
+      <span style="font-size:13px;font-weight:500;color:#555;min-width:80px">Custom timer</span>
       <select class="ct-input" id="ct-mode" style="width:110px" onchange="ctModeChange()">
         <option value="minutes">Minutes</option>
         <option value="endtime">End time</option>
       </select>
-      <input class="ct-input" type="number" id="ct-minutes" min="1" max="120" value="5" placeholder="min">
-      <input class="ct-input" type="time"   id="ct-endtime" style="display:none">
-      <input class="ct-input" type="text"   id="ct-name" placeholder="Label (optional)" style="width:140px">
+      <input class="ct-input" type="number" id="ct-minutes" min="1" max="120" value="5" style="width:70px">
+      <input class="ct-input" type="time" id="ct-endtime" style="display:none">
+      <input class="ct-input" type="text" id="ct-name" placeholder="Label (optional)" style="width:140px">
       <button class="ct-btn primary" onclick="ctStart()">Start</button>
-      <button class="ct-btn pause"   id="ct-pause-btn" style="display:none" onclick="ctPause()">Pause</button>
-      <button class="ct-btn stop"    id="ct-stop-btn"  style="display:none" onclick="ctStop()">Stop</button>
-      <span class="ct-spacer"></span>
-      <span class="ct-status" id="ct-status"></span>
+      <button class="ct-btn pause" id="ct-pause-btn" style="display:none" onclick="ctPause()">Pause</button>
+      <button class="ct-btn stop" id="ct-stop-btn" style="display:none" onclick="ctStop()">Stop</button>
+      <span style="flex:1"></span>
+      <span style="font-size:13px;color:#aaa" id="ct-status"></span>
     </div>
     <div class="timer-area" id="timer-area"></div>
   </div>
 </div>
 
-<!-- Setup Modal -->
+<!-- Setup -->
 <div class="modal-overlay" id="setup-modal" style="display:none">
   <div class="modal">
     <div class="modal-header">
@@ -178,192 +176,127 @@ body.projector .sim-banner { background: #1a1524; border-color: #4c1d95; color: 
       <span class="step-ind" id="setup-step-ind"></span>
       <button class="modal-close" onclick="closeModal('setup-modal')">×</button>
     </div>
-    <div class="modal-body"   id="setup-body"></div>
+    <div class="modal-body" id="setup-body"></div>
     <div class="modal-footer" id="setup-footer"></div>
   </div>
 </div>
-
-<!-- Override Modal -->
+<!-- Override -->
 <div class="modal-overlay" id="override-modal" style="display:none">
   <div class="modal modal-sm">
     <div class="modal-header"><h3>Week schedule override</h3><button class="modal-close" onclick="closeModal('override-modal')">×</button></div>
     <div class="modal-body">
-      <div class="info-box">Overrides the schedule for the entire current week. Reverts next week automatically.</div>
+      <div class="info-box">Overrides the entire current week. Reverts next week automatically.</div>
       <div class="section-label">Choose a schedule type</div>
       <div class="tpl-grid" id="override-grid"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-danger"    onclick="clearOverride()">Clear override</button>
+      <button class="btn-danger" onclick="clearOverride()">Clear override</button>
       <button class="btn-secondary" onclick="closeModal('override-modal')">Cancel</button>
-      <button class="btn-primary"   onclick="saveOverride()">Apply to this week</button>
+      <button class="btn-primary" onclick="saveOverride()">Apply to this week</button>
     </div>
   </div>
 </div>
-
-<!-- Simulate Modal -->
+<!-- Simulate -->
 <div class="modal-overlay" id="sim-modal" style="display:none">
   <div class="modal modal-sm">
     <div class="modal-header"><h3>Simulate date and time</h3><button class="modal-close" onclick="closeModal('sim-modal')">×</button></div>
     <div class="modal-body">
-      <div class="info-box">Set any date and time. The timer runs forward in real time from that point.</div>
+      <div class="info-box">Timer runs forward in real time from this point.</div>
       <div class="sim-row"><label>Date</label><input type="date" id="sim-date"></div>
       <div class="sim-row"><label>Time</label><input type="time" id="sim-time" value="09:30"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-danger"    onclick="clearSim()">Turn off</button>
+      <button class="btn-danger" onclick="clearSim()">Turn off</button>
       <button class="btn-secondary" onclick="closeModal('sim-modal')">Cancel</button>
-      <button class="btn-primary"   onclick="saveSim()">Start simulation</button>
+      <button class="btn-primary" onclick="saveSim()">Start simulation</button>
     </div>
   </div>
 </div>
 
 <script>
-const DAYS        = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-const SHORT       = ['Mon','Tue','Wed','Thu','Fri'];
-const MONTHS      = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAY_NAMES_LC = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-const SK_WEEKS  = 'bs5_weeks';
-const SK_SCHEDS = 'bs5_scheds';
-const SK_WOVER  = 'bs5_wover';
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY_LC=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+const SK_W='bs5_weeks', SK_S='bs5_scheds', SK_O='bs5_wover';
 
-let weekList     = [];
-let schedTypes   = {};
-let weekOverride = null;
-let viewDay      = 0;
-let simOffset    = null;
-let projectorOn  = false;
-let ctBarOpen    = false;
-let ct = { active:false, paused:false, endEpoch:null, pausedSecsLeft:null, totalSecs:null, label:'' };
-let setupWeekList=[], setupTypeKeys=[], setupTypeIdx=0, setupSchedBuf={};
-let selOverrideTpl = null;
+let weekList=[], schedTypes={}, weekOverride=null;
+let viewDay=0, simOffset=null, projectorOn=false, ctBarOpen=false;
+let ct={active:false,paused:false,endEpoch:null,pausedSecsLeft:null,totalSecs:null,label:''};
+let setupWeekList=[], setupTypeKeys=[], setupTypeIdx=0, setupSchedBuf={}, selOverrideTpl=null;
 
-// ── Default data ──────────────────────────────────────────────
-const DEFAULT_WEEK_LIST_TEXT = `8/18/25\tRegular Week
-8/25/25\tRegular Week
-9/1/25\tMonday Holiday Week
-9/8/25\tRegular Week
-9/15/25\tRegular Week
-9/22/25\tRegular Week
-9/29/25\tRegular Week
-10/6/25\tRegular Week
-10/13/25\tMonday Holiday Week
-10/20/25\tRegular Week
-10/27/25\tRegular Week
-11/3/25\tRegular Week
-11/10/25\tTuesday Holiday Week
-11/17/25\tConference Week
-11/24/25\tNo School Week
-12/1/25\tRegular Week
-12/8/25\tRegular Week
-12/15/25\tRegular Week
-12/22/25\tNo School Week
-12/29/25\tNo School Week
-1/5/26\tRegular Week
-1/12/26\tRegular Week
-1/19/26\tMonday Holiday Week
-1/26/26\tRegular Week
-2/2/26\tRegular Week
-2/9/26\tRegular Week
-2/16/26\tMonday Tuesday Holiday Week
-2/23/26\tRegular Week
-3/2/26\tConference Week
-3/9/26\tRegular Week
-3/16/26\tRegular Week
-3/23/26\tFriday Holiday Week
-3/30/26\tNo School Week
-4/6/26\tRegular Week
-4/13/26\tRegular Week
-4/20/26\tRegular Week
-4/27/26\tRegular Week
-5/4/26\tRegular Week
-5/11/26\tRegular Week
-5/18/26\tRegular Week
-5/25/26\tMonday Holiday Week
-6/1/26\tLast Week of School`;
-
-const DEFAULT_SCHEDULES_TEXT = {
+// ── Defaults ──────────────────────────────────────────────────
+const DWL=`8/18/25\tRegular Week\n8/25/25\tRegular Week\n9/1/25\tMonday Holiday Week\n9/8/25\tRegular Week\n9/15/25\tRegular Week\n9/22/25\tRegular Week\n9/29/25\tRegular Week\n10/6/25\tRegular Week\n10/13/25\tMonday Holiday Week\n10/20/25\tRegular Week\n10/27/25\tRegular Week\n11/3/25\tRegular Week\n11/10/25\tTuesday Holiday Week\n11/17/25\tConference Week\n11/24/25\tNo School Week\n12/1/25\tRegular Week\n12/8/25\tRegular Week\n12/15/25\tRegular Week\n12/22/25\tNo School Week\n12/29/25\tNo School Week\n1/5/26\tRegular Week\n1/12/26\tRegular Week\n1/19/26\tMonday Holiday Week\n1/26/26\tRegular Week\n2/2/26\tRegular Week\n2/9/26\tRegular Week\n2/16/26\tMonday Tuesday Holiday Week\n2/23/26\tRegular Week\n3/2/26\tConference Week\n3/9/26\tRegular Week\n3/16/26\tRegular Week\n3/23/26\tFriday Holiday Week\n3/30/26\tNo School Week\n4/6/26\tRegular Week\n4/13/26\tRegular Week\n4/20/26\tRegular Week\n4/27/26\tRegular Week\n5/4/26\tRegular Week\n5/11/26\tRegular Week\n5/18/26\tRegular Week\n5/25/26\tMonday Holiday Week\n6/1/26\tLast Week of School`;
+const DST={
   regular:`Advisory\tMonday\t9:30 AM\t9:56 AM\n1\tMonday\t10:01 AM\t11:17 AM\n2\tMonday\t11:22 AM\t12:38 PM\nLunch\tMonday\t12:38 PM\t1:18 PM\n3\tMonday\t1:23 PM\t2:39 PM\n4\tMonday\t2:44 PM\t4:00 PM\nAdvisory\tTuesday\t9:30 AM\t10:06 AM\n5\tTuesday\t10:11 AM\t11:27 AM\n6\tTuesday\t11:32 AM\t12:48 PM\nLunch\tTuesday\t12:53 PM\t1:28 PM\n7\tTuesday\t1:33 PM\t2:49 PM\n1\tTuesday\t2:54 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:02 AM\n2\tWednesday\t10:07 AM\t11:13 AM\n3\tWednesday\t11:18 AM\t12:24 PM\nLunch\tWednesday\t12:29 PM\t1:04 PM\n4\tWednesday\t1:09 PM\t2:15 PM\n5\tThursday\t9:30 AM\t10:36 AM\n6\tThursday\t10:41 AM\t11:47 AM\n7\tThursday\t11:52 AM\t12:58 PM\nLunch\tThursday\t1:03 PM\t1:38 PM\n1\tThursday\t1:43 PM\t2:49 PM\n2\tThursday\t2:54 PM\t4:00 PM\n3\tFriday\t9:30 AM\t10:36 AM\n4\tFriday\t10:41 AM\t11:47 AM\n5\tFriday\t11:52 AM\t12:58 PM\nLunch\tFriday\t1:03 PM\t1:38 PM\n6\tFriday\t1:43 PM\t2:49 PM\n7\tFriday\t2:54 PM\t4:00 PM`,
   monday_holiday:`1\tTuesday\t9:30 AM\t10:54 AM\n2\tTuesday\t10:59 AM\t12:23 PM\nLunch\tTuesday\t12:23 PM\t1:02 PM\n3\tTuesday\t1:07 PM\t2:31 PM\n4\tTuesday\t2:36 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:00 AM\n5\tWednesday\t10:05 AM\t11:29 AM\nLunch\tWednesday\t11:29 AM\t12:08 PM\n6\tWednesday\t12:13 PM\t1:37 PM\nAdvisory\tWednesday\t1:42 PM\t2:15 PM\n7\tThursday\t9:30 AM\t10:54 AM\n1\tThursday\t10:59 AM\t12:23 PM\nLunch\tThursday\t12:23 PM\t1:02 PM\n2\tThursday\t1:07 PM\t2:31 PM\n3\tThursday\t2:36 PM\t4:00 PM\n4\tFriday\t9:30 AM\t10:54 AM\n5\tFriday\t10:59 AM\t12:23 PM\nLunch\tFriday\t12:23 PM\t1:02 PM\n6\tFriday\t1:07 PM\t2:31 PM\n7\tFriday\t2:36 PM\t4:00 PM`,
   tuesday_holiday:`1\tMonday\t9:30 AM\t10:54 AM\n2\tMonday\t10:59 AM\t12:23 PM\nLunch\tMonday\t12:23 PM\t1:02 PM\n3\tMonday\t1:07 PM\t2:31 PM\n4\tMonday\t2:36 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:00 AM\n5\tWednesday\t10:05 AM\t11:29 AM\nLunch\tWednesday\t11:29 AM\t12:08 PM\n6\tWednesday\t12:13 PM\t1:37 PM\nAdvisory\tWednesday\t1:42 PM\t2:15 PM\n7\tThursday\t9:30 AM\t10:54 AM\n1\tThursday\t10:59 AM\t12:23 PM\nLunch\tThursday\t12:23 PM\t1:02 PM\n2\tThursday\t1:07 PM\t2:31 PM\n3\tThursday\t2:36 PM\t4:00 PM\n4\tFriday\t9:30 AM\t10:54 AM\n5\tFriday\t10:59 AM\t12:23 PM\nLunch\tFriday\t12:23 PM\t1:02 PM\n6\tFriday\t1:07 PM\t2:31 PM\n7\tFriday\t2:36 PM\t4:00 PM`,
   friday_holiday:`4\tMonday\t9:30 AM\t10:54 AM\n5\tMonday\t10:59 AM\t12:23 PM\nLunch\tMonday\t12:23 PM\t1:02 PM\n6\tMonday\t1:07 PM\t2:31 PM\n7\tMonday\t2:36 PM\t4:00 PM\n1\tTuesday\t9:30 AM\t10:54 AM\n2\tTuesday\t10:59 AM\t12:23 PM\nLunch\tTuesday\t12:23 PM\t1:02 PM\n3\tTuesday\t1:07 PM\t2:31 PM\n4\tTuesday\t2:36 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:00 AM\n5\tWednesday\t10:05 AM\t11:29 AM\nLunch\tWednesday\t11:29 AM\t12:08 PM\n6\tWednesday\t12:13 PM\t1:37 PM\nAdvisory\tWednesday\t1:42 PM\t2:15 PM\n7\tThursday\t9:30 AM\t10:54 AM\n1\tThursday\t10:59 AM\t12:23 PM\nLunch\tThursday\t12:23 PM\t1:02 PM\n2\tThursday\t1:07 PM\t2:31 PM\n3\tThursday\t2:36 PM\t4:00 PM`,
   monday_tuesday_holiday:`4\tWednesday\t9:30 AM\t10:25 AM\n5\tWednesday\t10:30 AM\t11:25 AM\n6\tWednesday\t11:30 AM\t12:25 PM\nLunch\tWednesday\t12:30 PM\t1:15 PM\n7\tWednesday\t1:20 PM\t2:15 PM\n1\tThursday\t9:30 AM\t10:25 AM\n2\tThursday\t10:30 AM\t11:25 AM\n3\tThursday\t11:30 AM\t12:25 PM\nLunch\tThursday\t12:30 PM\t1:15 PM\n4\tThursday\t1:20 PM\t2:15 PM\n5\tThursday\t2:20 PM\t3:15 PM\nAdvisory\tThursday\t3:20 PM\t4:00 PM\n6\tFriday\t9:30 AM\t10:25 AM\n7\tFriday\t10:30 AM\t11:25 AM\n1\tFriday\t11:30 AM\t12:25 PM\nLunch\tFriday\t12:30 PM\t1:15 PM\n2\tFriday\t1:20 PM\t2:15 PM\n3\tFriday\t2:20 PM\t3:15 PM\nAdvisory\tFriday\t3:20 PM\t4:00 PM`,
-  conference:`1\tMonday\t9:30 AM\t9:56 AM\n2\tMonday\t10:01 AM\t11:17 AM\nLunch\tMonday\t11:22 AM\t12:38 PM\n3\tMonday\t12:38 PM\t1:18 PM\n4\tTuesday\t9:30 AM\t10:06 AM\n5\tTuesday\t10:11 AM\t11:27 AM\nLunch\tTuesday\t11:32 AM\t12:48 PM\n6\tTuesday\t12:53 PM\t1:28 PM\n7\tWednesday\t9:30 AM\t10:02 AM\n1\tWednesday\t10:07 AM\t11:13 AM\nAdvisory\tWednesday\t11:18 AM\t12:24 PM\n2\tThursday\t9:30 AM\t10:36 AM\n3\tThursday\t10:41 AM\t11:47 AM\nLunch\tThursday\t11:52 AM\t12:58 PM\n4\tThursday\t1:03 PM\t1:38 PM\n5\tFriday\t9:30 AM\t10:36 AM\n6\tFriday\t10:41 AM\t11:47 AM\nLunch\tFriday\t11:52 AM\t12:58 PM\n7\tFriday\t1:03 PM\t1:38 PM`,
-  last_week:`1\tMonday\t9:30 AM\t10:25 AM\n2\tMonday\t10:30 AM\t11:25 AM\n3\tMonday\t11:30 AM\t12:25 PM\nLunch\tMonday\t12:30 PM\t1:15 PM\n4\tMonday\t1:20 PM\t2:15 PM\n5\tMonday\t2:20 PM\t3:15 PM\nAdvisory\tMonday\t3:20 PM\t4:00 PM\n6\tTuesday\t9:30 AM\t10:25 AM\n7\tTuesday\t10:30 AM\t11:25 AM\n1\tTuesday\t11:30 AM\t12:25 PM\nLunch\tTuesday\t12:30 PM\t1:15 PM\n2\tTuesday\t1:20 PM\t2:15 PM\n3\tTuesday\t2:20 PM\t3:15 PM\nAdvisory\tTuesday\t3:20 PM\t4:00 PM\n4\tWednesday\t9:30 AM\t10:25 AM\n5\tWednesday\t10:30 AM\t11:25 AM\n6\tWednesday\t11:30 AM\t12:25 PM\nLunch\tWednesday\t12:30 PM\t1:15 PM\n7\tWednesday\t1:20 PM\t2:15 PM`,
+  conference:`1\tMonday\t9:30 AM\t10:48 AM\n2\tMonday\t10:53 AM\t12:11 PM\nLunch\tMonday\t12:16 PM\t12:52 PM\n3\tMonday\t12:57 PM\t2:15 PM\n4\tTuesday\t9:30 AM\t10:48 AM\n5\tTuesday\t10:53 AM\t12:11 PM\nLunch\tTuesday\t12:16 PM\t12:52 PM\n6\tTuesday\t12:57 PM\t2:15 PM\n7\tWednesday\t9:30 AM\t10:48 AM\n1\tWednesday\t10:53 AM\t12:11 PM\nLunch\tWednesday\t12:16 PM\t12:52 PM\nAdvisory\tWednesday\t12:57 PM\t2:15 PM\n2\tThursday\t9:30 AM\t10:48 AM\n3\tThursday\t10:53 AM\t12:11 PM\nLunch\tThursday\t12:16 PM\t12:52 PM\n4\tThursday\t12:57 PM\t2:15 PM\n5\tFriday\t9:30 AM\t10:48 AM\n6\tFriday\t10:53 AM\t12:11 PM\nLunch\tFriday\t12:16 PM\t12:52 PM\n7\tFriday\t12:57 PM\t2:15 PM`,
+  last_week:`1\tMonday\t9:30 AM\t10:25 AM\n2\tMonday\t10:30 AM\t11:25 AM\n3\tMonday\t11:30 AM\t12:25 PM\nLunch\tMonday\t12:30 PM\t1:15 PM\n4\tMonday\t1:20 PM\t2:15 PM\n5\tMonday\t2:20 PM\t3:15 PM\nAdvisory\tMonday\t3:20 PM\t4:00 PM\n6\tTuesday\t9:30 AM\t10:25 AM\n7\tTuesday\t10:30 AM\t11:25 AM\n1\tTuesday\t11:30 AM\t12:25 PM\nLunch\tTuesday\t12:30 PM\t1:15 PM\n2\tTuesday\t1:20 PM\t2:15 PM\n3\tTuesday\t2:20 PM\t3:15 PM\nAdvisory\tTuesday\t3:20 PM\t4:00 PM\n4\tWednesday\t9:30 AM\t10:25 AM\n5\tWednesday\t10:30 AM\t11:25 AM\n6\tWednesday\t11:30 AM\t12:25 PM\nLunch\tWednesday\t12:30 PM\t1:15 PM\n7\tWednesday\t1:20 PM\t2:15 PM`
 };
-
-function loadDefaults() {
-  weekList = parseWeekList(DEFAULT_WEEK_LIST_TEXT);
-  schedTypes = {};
-  for (const [k,v] of Object.entries(DEFAULT_SCHEDULES_TEXT)) schedTypes[k] = parseSchedulePaste(v);
-}
+function loadDefaults(){weekList=parseWeekList(DWL);schedTypes={};for(const[k,v]of Object.entries(DST))schedTypes[k]=parseSchedulePaste(v);}
 
 // ── Persistence ───────────────────────────────────────────────
-function saveAll() {
-  try { localStorage.setItem(SK_WEEKS,JSON.stringify(weekList)); localStorage.setItem(SK_SCHEDS,JSON.stringify(schedTypes)); localStorage.setItem(SK_WOVER,JSON.stringify(weekOverride)); } catch(e) {}
-}
-function loadAll() {
-  try { const w=localStorage.getItem(SK_WEEKS),s=localStorage.getItem(SK_SCHEDS),o=localStorage.getItem(SK_WOVER); if(w)weekList=JSON.parse(w); if(s)schedTypes=JSON.parse(s); if(o)weekOverride=JSON.parse(o); } catch(e) {}
-  if (!weekList.length || !Object.keys(schedTypes).length) loadDefaults();
-}
+function saveAll(){try{localStorage.setItem(SK_W,JSON.stringify(weekList));localStorage.setItem(SK_S,JSON.stringify(schedTypes));localStorage.setItem(SK_O,JSON.stringify(weekOverride));}catch(e){}}
+function loadAll(){try{const w=localStorage.getItem(SK_W),s=localStorage.getItem(SK_S),o=localStorage.getItem(SK_O);if(w)weekList=JSON.parse(w);if(s)schedTypes=JSON.parse(s);if(o)weekOverride=JSON.parse(o);}catch(e){}if(!weekList.length||!Object.keys(schedTypes).length)loadDefaults();}
 
-// ── Time helpers ──────────────────────────────────────────────
-function effectiveNow()    { return simOffset!==null ? new Date(Date.now()+simOffset) : new Date(); }
-function isWeekend(d)      { const day=(d||effectiveNow()).getDay(); return day===0||day===6; }
-function todayDayIdx(d)    { const day=(d||effectiveNow()).getDay(); return (day===0||day===6)?-1:day-1; }
-function getViewDate(now) {
-  if (!isWeekend(now)) { const d=new Date(now); d.setDate(d.getDate()+(viewDay-todayDayIdx(now))); return d; }
-  const mon=new Date(now); mon.setDate(mon.getDate()+(mon.getDay()===0?1:8-mon.getDay())+viewDay); return mon;
+// ── Helpers ───────────────────────────────────────────────────
+function effectiveNow(){return simOffset!==null?new Date(Date.now()+simOffset):new Date();}
+function isWeekend(d){const day=(d||effectiveNow()).getDay();return day===0||day===6;}
+function todayDayIdx(d){const day=(d||effectiveNow()).getDay();return(day===0||day===6)?-1:day-1;}
+function getViewDate(now){
+  if(!isWeekend(now)){const d=new Date(now);d.setDate(d.getDate()+(viewDay-todayDayIdx(now)));return d;}
+  const mon=new Date(now);mon.setDate(mon.getDate()+(mon.getDay()===0?1:8-mon.getDay())+viewDay);return mon;
 }
-function getViewDateForDay(now,di) {
-  if (!isWeekend(now)) { const d=new Date(now); d.setDate(d.getDate()+(di-todayDayIdx(now))); return d; }
-  const mon=new Date(now); mon.setDate(mon.getDate()+(mon.getDay()===0?1:8-mon.getDay())+di); return mon;
+function getViewDateForDay(now,di){
+  if(!isWeekend(now)){const d=new Date(now);d.setDate(d.getDate()+(di-todayDayIdx(now)));return d;}
+  const mon=new Date(now);mon.setDate(mon.getDate()+(mon.getDay()===0?1:8-mon.getDay())+di);return mon;
 }
-function mondayOf(date) { const d=new Date(date); d.setHours(12,0,0,0); const day=d.getDay(); d.setDate(d.getDate()+(day===0?-6:1-day)); return d.toISOString().slice(0,10); }
-function fmtDateLong(date) { const dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']; return `${dn[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`; }
-function fmtTimeClock(date) { let h=date.getHours(),m=date.getMinutes(); const ap=h>=12?'PM':'AM'; h=h%12||12; return `${h}:${String(m).padStart(2,'0')} ${ap}`; }
-function toMins(t)  { const[h,m]=t.split(':').map(Number); return h*60+m; }
-function fmtCD(s,showSecs=true) { s=Math.max(0,Math.round(s)); return showSecs?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:`${Math.floor(s/60)}m`; }
-function fmtTime(t) { if(!t)return''; const[h,m]=t.split(':').map(Number); return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'pm':'am'}`; }
-function isLunch(p) { return p.name.toLowerCase().includes('lunch'); }
-function parse12h(s) { const m=s.trim().match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return null; let h=parseInt(m[1]),mn=parseInt(m[2]); const pm=m[3].toUpperCase()==='PM'; if(pm&&h!==12)h+=12; if(!pm&&h===12)h=0; return `${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`; }
-function fmt24to12(t) { const[h,m]=t.split(':').map(Number); return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`; }
-function prettyType(tk) { if(!tk)return''; return tk.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function mondayOf(date){const d=new Date(date);d.setHours(12,0,0,0);const day=d.getDay();d.setDate(d.getDate()+(day===0?-6:1-day));return d.toISOString().slice(0,10);}
+function fmtDateLong(date){const dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];return `${dn[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;}
+function fmtClock(date){let h=date.getHours(),m=date.getMinutes();const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${String(m).padStart(2,'0')} ${ap}`;}
+function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function fmtCD(s,showSecs=true){s=Math.max(0,Math.round(s));return showSecs?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:`${Math.floor(s/60)}m`;}
+function fmtTime(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'pm':'am'}`;}
+function isLunch(p){return p.name.toLowerCase().includes('lunch');}
+function parse12h(s){const m=s.trim().match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return null;let h=parseInt(m[1]),mn=parseInt(m[2]);const pm=m[3].toUpperCase()==='PM';if(pm&&h!==12)h+=12;if(!pm&&h===12)h=0;return `${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;}
+function fmt24to12(t){const[h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+function prettyType(tk){if(!tk)return'';return tk.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function getTypeForDate(date){const ms=mondayOf(date);if(weekOverride&&weekOverride.mondayStr===ms)return weekOverride.typeKey;const e=weekList.find(w=>w.mondayStr===ms);return e?e.typeKey:null;}
+function getScheduleForDay(di,date){const tk=getTypeForDate(date);if(!tk||tk==='noschool')return[];const td=schedTypes[tk];if(!td)return[];return td[di]||[];}
+function isNoSchoolDay(di,date){const tk=getTypeForDate(date);if(!tk)return false;if(tk==='noschool')return true;const td=schedTypes[tk];if(!td)return false;return!td[di]||td[di].length===0;}
 
-// ── Schedule lookup ───────────────────────────────────────────
-function getTypeForDate(date) { const ms=mondayOf(date); if(weekOverride&&weekOverride.mondayStr===ms)return weekOverride.typeKey; const e=weekList.find(w=>w.mondayStr===ms); return e?e.typeKey:null; }
-function getScheduleForDay(di,date) { const tk=getTypeForDate(date); if(!tk||tk==='noschool')return[]; const td=schedTypes[tk]; if(!td)return[]; return td[di]||[]; }
-function isNoSchoolDay(di,date) { const tk=getTypeForDate(date); if(!tk)return false; if(tk==='noschool')return true; const td=schedTypes[tk]; if(!td)return false; return!td[di]||td[di].length===0; }
-
-// ── Bell sound ────────────────────────────────────────────────
-function playBell(times) {
+// ── Bell ──────────────────────────────────────────────────────
+function playBell(times){
   times=times||1;
-  try {
+  try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     const strike=(off)=>{
-      const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination);
-      o.type='sine'; o.frequency.setValueAtTime(880,ctx.currentTime+off); o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+off+1.2);
-      g.gain.setValueAtTime(0.6,ctx.currentTime+off); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+off+2.0);
-      o.start(ctx.currentTime+off); o.stop(ctx.currentTime+off+2.0);
-      const o2=ctx.createOscillator(),g2=ctx.createGain(); o2.connect(g2); g2.connect(ctx.destination);
-      o2.type='sine'; o2.frequency.setValueAtTime(1320,ctx.currentTime+off); o2.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+off+0.8);
-      g2.gain.setValueAtTime(0.25,ctx.currentTime+off); g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+off+1.2);
-      o2.start(ctx.currentTime+off); o2.stop(ctx.currentTime+off+1.2);
+      const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+      o.type='sine';o.frequency.setValueAtTime(880,ctx.currentTime+off);o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+off+1.2);
+      g.gain.setValueAtTime(0.6,ctx.currentTime+off);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+off+2);
+      o.start(ctx.currentTime+off);o.stop(ctx.currentTime+off+2);
+      const o2=ctx.createOscillator(),g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);
+      o2.type='sine';o2.frequency.setValueAtTime(1320,ctx.currentTime+off);o2.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+off+0.8);
+      g2.gain.setValueAtTime(0.25,ctx.currentTime+off);g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+off+1.2);
+      o2.start(ctx.currentTime+off);o2.stop(ctx.currentTime+off+1.2);
     };
-    for(let i=0;i<times;i++) strike(i*0.6);
-  } catch(e) {}
+    for(let i=0;i<times;i++)strike(i*0.6);
+  }catch(e){}
 }
 
-// ── Ring helpers ──────────────────────────────────────────────
-function ringHTML(pct,cd,label,sublabel,colorCls,sz,sw,cdFs,pctFs,lblFs) {
+// ── Ring builders ─────────────────────────────────────────────
+function ringHTML(pct,cd,label,sublabel,colorCls,sz,sw,cdFs,pctFs,lblFs){
   const r=sz*0.42,c=2*Math.PI*r,off=(c*(1-pct/100)).toFixed(2);
   const stroke=colorCls==='urgent'?'#dc2626':colorCls==='lunch-color'?'#f59e0b':colorCls==='day-color'?'#a5b4fc':colorCls==='passing'?'#0891b2':colorCls==='custom-timer'?'#059669':'#4f46e5';
-  const trackColor=colorCls==='day-color'?'#e8e8f8':'#eeeeee';
+  const track=colorCls==='day-color'?'#e8e8f8':'#eeeeee';
   const cx=sz/2,cy=sz/2;
   return `<div class="ring-block">
-    <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em">${label}</div>
+    <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;text-align:center">${label}</div>
     <div class="ring-wrap" style="width:${sz}px;height:${sz}px">
       <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">
-        <circle fill="none" stroke="${trackColor}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}"/>
+        <circle fill="none" stroke="${track}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}"/>
         <circle class="ring-fill" stroke="${stroke}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}"
           stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off}" transform="rotate(-90 ${cx} ${cy})"/>
       </svg>
@@ -376,90 +309,97 @@ function ringHTML(pct,cd,label,sublabel,colorCls,sz,sw,cdFs,pctFs,lblFs) {
   </div>`;
 }
 
-function dayRingHTML(periods,nsSec,dayStart,dayEnd,sz,sw,cdFs,pctFs,lblFs) {
+function dayRingHTML(periods,nsSec,dayStart,dayEnd,sz,sw,cdFs,pctFs,lblFs){
   const r=sz*0.42,cx=sz/2,cy=sz/2,c=2*Math.PI*r;
-  const totalSecs=dayEnd-dayStart;
-  const elapsed=Math.min(totalSecs,Math.max(0,nsSec-dayStart));
-  const dayPct=Math.round(elapsed/totalSecs*100);
-  const daySecsLeft=Math.max(0,dayEnd-nsSec);
-  const dayCd=fmtCD(daySecsLeft,daySecsLeft<60);
-  const colorMap={class:projectorOn?'#6366f1':'#4f46e5',passing:projectorOn?'#0e7490':'#0891b2',lunch:'#f59e0b'};
-  const trackColor=projectorOn?'#1e1e2e':'#e8e8f8';
-  let arcsSVG=`<circle fill="none" stroke="${trackColor}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}"/>`;
-  // build segments
+  const total=dayEnd-dayStart,elapsed=Math.min(total,Math.max(0,nsSec-dayStart));
+  const dayPct=Math.round(elapsed/total*100);
+  const left=Math.max(0,dayEnd-nsSec);
+  const dayCd=fmtCD(left,left<60);
+  const clr={class:projectorOn?'#6366f1':'#4f46e5',passing:projectorOn?'#0e7490':'#0891b2',lunch:'#f59e0b'};
+  const track=projectorOn?'#1e1e2e':'#e8e8f8';
+  let arcs=`<circle fill="none" stroke="${track}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}"/>`;
+  const drawSeg=(s,e,type)=>{
+    const ss=Math.max(dayStart,s),ee=Math.min(nsSec,e);
+    if(ee<=ss)return;
+    const sf=(ss-dayStart)/total,ef=(ee-dayStart)/total;
+    const arcLen=(ef-sf)*c;
+    arcs+=`<circle fill="none" stroke="${clr[type]}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}" stroke-dasharray="${arcLen.toFixed(2)} ${(c-arcLen).toFixed(2)}" transform="rotate(${(sf*360-90).toFixed(2)} ${cx} ${cy})"/>`;
+  };
   for(let i=0;i<periods.length;i++){
     const ps=toMins(periods[i].start)*60,pe=toMins(periods[i].end)*60;
-    const type=isLunch(periods[i])?'lunch':'class';
-    const drawSeg=(segStart,segEnd,segType)=>{
-      const s=Math.max(dayStart,segStart),e=Math.min(nsSec,segEnd);
-      if(e<=s)return;
-      const sf=(s-dayStart)/totalSecs,ef=(e-dayStart)/totalSecs;
-      const arcLen=(ef-sf)*c,gapLen=c-arcLen;
-      const rotDeg=sf*360-90;
-      arcsSVG+=`<circle fill="none" stroke="${colorMap[segType]}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}" stroke-dasharray="${arcLen.toFixed(2)} ${gapLen.toFixed(2)}" transform="rotate(${rotDeg.toFixed(2)} ${cx} ${cy})"/>`;
-    };
-    drawSeg(ps,pe,type);
+    drawSeg(ps,pe,isLunch(periods[i])?'lunch':'class');
     if(i<periods.length-1){const ns2=toMins(periods[i+1].start)*60;if(ns2>pe)drawSeg(pe,ns2,'passing');}
   }
-  // dot
-  const dotFrac=elapsed/totalSecs,dotAngle=dotFrac*2*Math.PI-Math.PI/2;
-  arcsSVG+=`<circle fill="${projectorOn?'#fff':'#1a1a1a'}" cx="${(cx+r*Math.cos(dotAngle)).toFixed(2)}" cy="${(cy+r*Math.sin(dotAngle)).toFixed(2)}" r="${sw/2+1}"/>`;
-  const lgd=[{c:colorMap.class,l:'Class'},{c:colorMap.passing,l:'Passing'},{c:colorMap.lunch,l:'Lunch'}];
-  const legendHTML=`<div style="display:flex;gap:8px;justify-content:center;margin-top:4px">${lgd.map(l=>`<span style="font-size:${Math.max(9,lblFs-1)}px;color:${projectorOn?'#555':'#aaa'};display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.c}"></span>${l.l}</span>`).join('')}</div>`;
+  const dotFrac=elapsed/total,dotAngle=dotFrac*2*Math.PI-Math.PI/2;
+  arcs+=`<circle fill="${projectorOn?'#fff':'#1a1a1a'}" cx="${(cx+r*Math.cos(dotAngle)).toFixed(2)}" cy="${(cy+r*Math.sin(dotAngle)).toFixed(2)}" r="${(sw/2+1).toFixed(1)}"/>`;
+  const lgd=[{c:clr.class,l:'Class'},{c:clr.passing,l:'Passing'},{c:clr.lunch,l:'Lunch'}];
+  const legend=`<div style="display:flex;gap:8px;justify-content:center;margin-top:4px">${lgd.map(l=>`<span style="font-size:${Math.max(9,lblFs-1)}px;color:${projectorOn?'#555':'#aaa'};display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.c}"></span>${l.l}</span>`).join('')}</div>`;
   return `<div class="ring-block">
-    <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em">School day</div>
+    <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;text-align:center">School day</div>
     <div class="ring-wrap" style="width:${sz}px;height:${sz}px">
-      <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">${arcsSVG}</svg>
+      <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">${arcs}</svg>
       <div class="ring-center">
         <div class="ring-cd day-color" style="font-size:${cdFs}px">${dayCd}</div>
         <div style="font-size:${pctFs}px;color:#aaa;margin-top:2px">${dayPct}%</div>
       </div>
     </div>
     <div style="font-size:${lblFs}px;color:#aaa;text-align:center">day remaining</div>
-    ${legendHTML}
+    ${legend}
   </div>`;
 }
 
 // ── Main render ───────────────────────────────────────────────
-function render() {
-  const now     = effectiveNow();
-  const vd      = getViewDate(now);
-  const effDay  = todayDayIdx(now);
-  const isToday = !isWeekend(now) && viewDay===effDay;
-  const tk      = getTypeForDate(vd);
-  const periods = getScheduleForDay(viewDay,vd);
-  const noSch   = isWeekend(vd)||isNoSchoolDay(viewDay,vd);
+function render(){
+  const now=effectiveNow();
+  const vd=getViewDate(now);
+  const effDay=todayDayIdx(now);
+  const isToday=!isWeekend(now)&&viewDay===effDay;
+  const tk=getTypeForDate(vd);
+  const periods=getScheduleForDay(viewDay,vd);
+  const noSch=isWeekend(vd)||isNoSchoolDay(viewDay,vd);
 
-  // ── Step 1: sizing (no ringSize used before this block) ──
+  // ── Sizing — all variables declared here, nothing before this uses them ──
   const W=window.innerWidth, H=window.innerHeight;
   const isNarrow=W<700, isMid=W>=700&&W<960;
-  const sb=document.getElementById('sidebar');
-  if (projectorOn||isNarrow) sb.style.cssText='width:0;min-width:0;overflow:hidden;border-right:none;';
-  else if (isMid)             sb.style.cssText='width:200px;min-width:200px;overflow:hidden;';
-  else                        sb.style.cssText='width:260px;min-width:260px;overflow:hidden;';
-  const sidebarW=projectorOn||isNarrow?0:isMid?200:260;
-  const availW=W-sidebarW-64;
+  const sideEl=document.getElementById('sidebar');
+  if(projectorOn||isNarrow) sideEl.style.cssText='width:0;min-width:0;overflow:hidden;border-right:none;';
+  else if(isMid) sideEl.style.cssText='width:200px;min-width:200px;overflow:hidden;';
+  else sideEl.style.cssText='width:260px;min-width:260px;overflow:hidden;';
+  const sideW=projectorOn||isNarrow?0:isMid?200:260;
+  const aW=W-sideW-40; // available width for rings area
   const ctHidden=document.getElementById('ct-bar').classList.contains('hidden');
-  const availH=H-(projectorOn?48:44)-(ctHidden?0:44)-180;
+  const usedH=document.getElementById('topbar').offsetHeight+(ctHidden?0:document.getElementById('ct-bar').offsetHeight);
+  const aH=H-usedH; // available height for entire timer area
   const numRings=2+(ct.active?1:0);
-  // compute ringSize — only declared once, here
-  let ringSize, ringsFlexDir;
-  if (isNarrow) {
-    const byW=Math.floor(availW*0.85), byH=Math.floor((availH-numRings*40)/numRings);
-    ringSize=Math.max(80,Math.min(byW,byH)); ringsFlexDir='column';
-  } else {
-    const byW=Math.floor((availW-numRings*32)/numRings), byH=Math.floor(availH);
-    ringSize=Math.max(80,Math.min(byW,byH,projectorOn?300:9999));
-    ringsFlexDir=ringSize<90?'column':'row';
-  }
-  const sw    = Math.max(6, Math.round(ringSize*0.07));
-  const cdFs  = Math.max(16,Math.round(ringSize*0.19));
-  const pctFs = Math.max(10,Math.round(ringSize*0.085));
-  const lblFs = Math.max(10,Math.round(ringSize*0.09));
-  const titleFs = Math.max(18,Math.min(48,Math.round(ringSize*0.3)));
+  const ringOH=100;
+  const timerAreaH=document.getElementById('timer-area').clientHeight;
+  // Clock is always shown now — projector gets bigger version
+  const clockFs=projectorOn?Math.round(timerAreaH*0.09):Math.round(timerAreaH*0.055);
+  const titleFsProv=Math.max(18,Math.min(48,Math.round(aW*0.045)));
+  const simH=simOffset!==null?40:0;
+  const aboveH=simH+clockFs+24+18+titleFsProv+18+14;
+  const freeH=timerAreaH-aboveH-40;
 
-  // ── Step 2: sidebar ──
-  document.getElementById('sidebar-time').textContent=fmtTimeClock(now);
+  const hW=Math.floor((aW-numRings*28)/numRings);
+  const hH=freeH-ringOH;
+  const hSz=Math.min(hW,hH);
+
+  const vW=Math.floor(aW*0.82);
+  const vH=Math.floor((freeH-numRings*ringOH)/numRings);
+  const vSz=Math.min(vW,Math.max(0,vH));
+
+  let ringSize,ringsFlexDir;
+  if(!isNarrow&&hSz>=100&&hSz>vSz){ringSize=Math.max(60,hSz);ringsFlexDir='row';}
+  else{ringSize=Math.max(60,vSz);ringsFlexDir='column';}
+
+  const sw=Math.max(6,Math.round(ringSize*0.07));
+  const cdFs=Math.max(16,Math.round(ringSize*0.19));
+  const pctFs=Math.max(10,Math.round(ringSize*0.085));
+  const lblFs=Math.max(10,Math.round(ringSize*0.09));
+  const titleFs=Math.max(18,Math.min(48,Math.round(ringSize*0.3)));
+
+  // ── Sidebar content ──
+  document.getElementById('sidebar-time').textContent=fmtClock(now);
   document.getElementById('sidebar-date').textContent=fmtDateLong(vd);
   let bc='regular',bl='Regular week';
   if(!tk){bc='regular';bl='No schedule data';}
@@ -467,23 +407,38 @@ function render() {
   else if(weekOverride&&weekOverride.mondayStr===mondayOf(vd)){bc='override';bl='Override: '+prettyType(tk);}
   else if(tk!=='regular'){bc='special';bl=prettyType(tk);}
   document.getElementById('sidebar-badge').innerHTML=`<span class="week-badge ${bc}">${bl}</span>`;
-  const ns=isToday?(now.getHours()*3600+now.getMinutes()*60+now.getSeconds()):-1;
-  const list=document.getElementById('period-list');
-  if(!periods.length) {
-    list.innerHTML=`<div class="no-periods">${noSch?'No school.':(!tk?'Click Setup to load your schedule.':'No periods set.')}</div>`;
-  } else {
-    list.innerHTML=periods.map(p=>{
-      const s=toMins(p.start)*60,e=toMins(p.end)*60;
-      let cls='upcoming'; if(ns>=0){if(ns>e)cls='past';else if(ns>=s)cls='current';}
-      return `<div class="period-item ${cls}${isLunch(p)?' lunch':''}"><div class="period-dot"></div><div class="period-name">${p.name}</div><div class="period-time">${fmtTime(p.start)}</div></div>`;
-    }).join('');
-  }
 
-  // ── Step 3: topbar ──
+  // Build full week schedule for sidebar
+  const list=document.getElementById('period-list');
+  let sidebarHTML='';
+  for(let di=0;di<5;di++){
+    const dayVd=getViewDateForDay(now,di);
+    const dayPeriods=getScheduleForDay(di,dayVd);
+    const isThisDay=!isWeekend(now)&&di===effDay;
+    const isDaySelected=di===viewDay;
+    const noSchDay=isNoSchoolDay(di,dayVd);
+    sidebarHTML+=`<div class="sidebar-day-header${isDaySelected?' sidebar-day-selected':''}" onclick="viewDay=${di};render()">${['Mon','Tue','Wed','Thu','Fri'][di]}</div>`;
+    if(noSchDay){
+      sidebarHTML+=`<div class="sidebar-no-school">No school</div>`;
+    } else if(!dayPeriods.length){
+      sidebarHTML+=`<div class="sidebar-no-school">No schedule</div>`;
+    } else {
+      const nsDay=isThisDay?(now.getHours()*3600+now.getMinutes()*60+now.getSeconds()):-1;
+      sidebarHTML+=dayPeriods.map(p=>{
+        const s=toMins(p.start)*60,e=toMins(p.end)*60;
+        let cls='upcoming';
+        if(nsDay>=0){if(nsDay>e)cls='past';else if(nsDay>=s)cls='current';}
+        return `<div class="period-item ${cls}${isLunch(p)?' lunch':''}"><div class="period-dot"></div><div class="period-name">${p.name}</div><div class="period-time">${fmtTime(p.start)}</div></div>`;
+      }).join('');
+    }
+  }
+  list.innerHTML=sidebarHTML;
+
+  // ── Topbar ──
   const hasOv=!!(weekOverride&&weekOverride.mondayStr===mondayOf(now));
-  const ob=document.getElementById('override-btn'); ob.classList.toggle('warn',hasOv); ob.textContent=hasOv?'Override active':'Week override';
-  const simb=document.getElementById('sim-btn'); simb.classList.toggle('active-state',simOffset!==null); simb.textContent=simOffset!==null?'Simulating…':'Simulate';
-  const pb=document.getElementById('proj-btn'); pb.classList.toggle('proj-on',projectorOn); pb.textContent=projectorOn?'Exit projector':'Projector';
+  const ob=document.getElementById('override-btn');ob.classList.toggle('warn',hasOv);ob.textContent=hasOv?'Override active':'Week override';
+  const simb=document.getElementById('sim-btn');simb.classList.toggle('active-state',simOffset!==null);simb.textContent=simOffset!==null?'Simulating…':'Simulate';
+  const pb=document.getElementById('proj-btn');pb.classList.toggle('proj-on',projectorOn);pb.textContent=projectorOn?'Exit projector':'Projector';
   document.getElementById('ct-toggle-btn').classList.toggle('active-state',ctBarOpen);
   document.querySelectorAll('.day-btn').forEach(b=>{
     const di=+b.dataset.day;
@@ -491,7 +446,7 @@ function render() {
     b.classList.toggle('noschool',isNoSchoolDay(di,getViewDateForDay(now,di)));
   });
 
-  // ── Step 4: timer area ──
+  // ── Timer area ──
   const area=document.getElementById('timer-area');
   const simBanner=simOffset!==null?`<div class="sim-banner">Simulation — ${fmtDateLong(now)} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</div>`:'';
 
@@ -520,62 +475,60 @@ function render() {
   let cur=null,nxt=null;
   for(let i=0;i<periods.length;i++){
     const s=toMins(periods[i].start)*60,e=toMins(periods[i].end)*60;
-    if(nsSec>=s&&nsSec<e) cur={p:periods[i],s,e};
-    else if(nsSec<s&&!nxt) nxt={p:periods[i],s,e};
+    if(nsSec>=s&&nsSec<e)cur={p:periods[i],s,e};
+    else if(nsSec<s&&!nxt)nxt={p:periods[i],s,e};
   }
 
   // bell
-  const prevPeriodIdx=render._lastPeriodIdx??-1;
-  const prevCtDone=render._lastCtDone??false;
-  const curPeriodIdx=cur?periods.indexOf(cur.p):-1;
+  const prevIdx=render._lastIdx??-1,prevCtDone=render._lastCtDone??false;
+  const curIdx=cur?periods.indexOf(cur.p):-1;
   if(isToday){
-    if(prevPeriodIdx>=0&&curPeriodIdx!==prevPeriodIdx) playBell();
-    if(prevPeriodIdx>=0&&nsSec>dayEnd&&(render._lastNsSec??0)<=dayEnd) playBell();
+    if(prevIdx>=0&&curIdx!==prevIdx)playBell();
+    if(prevIdx>=0&&nsSec>dayEnd&&(render._lastSec??0)<=dayEnd)playBell();
   }
-  render._lastPeriodIdx=curPeriodIdx;
-  render._lastNsSec=nsSec;
+  render._lastIdx=curIdx;render._lastSec=nsSec;
 
-  // period ring
+  // period ring values
   let pPct=0,pCd='0:00',pSub='',pCc='',ptitle='',ptimeStr='',plabel='Now';
   if(cur){
-    const left=cur.e-nsSec,total=cur.e-cur.s;
-    pPct=Math.round((1-left/total)*100); pCd=fmtCD(left);
+    const left=cur.e-nsSec,tot=cur.e-cur.s;
+    pPct=Math.round((1-left/tot)*100);pCd=fmtCD(left);
     pCc=left<120&&!isLunch(cur.p)?'urgent':isLunch(cur.p)?'lunch-color':'';
     pSub=isLunch(cur.p)?'lunch ends':'period ends';
-    ptitle=cur.p.name; ptimeStr=`${fmtTime(cur.p.start)} – ${fmtTime(cur.p.end)}`; plabel='Now';
-  } else if(nxt){
+    ptitle=cur.p.name;ptimeStr=`${fmtTime(cur.p.start)} – ${fmtTime(cur.p.end)}`;plabel='Now';
+  }else if(nxt){
     const until=nxt.s-nsSec;
-    const prevEnd=(()=>{for(let i=periods.length-1;i>=0;i--){const e=toMins(periods[i].end)*60;if(nsSec>=e)return e;}return dayStart;})();
-    const passDur=nxt.s-prevEnd;
-    pPct=passDur>0?Math.round((1-until/passDur)*100):0;
-    pCd=fmtCD(until); pSub='until period starts';
-    ptitle=`Passing → ${nxt.p.name}`; ptimeStr=`${nxt.p.name} starts ${fmtTime(nxt.p.start)}`; plabel='Passing period'; pCc='passing';
-  } else {
-    pCd=fmtCD(dayStart-nsSec); pSub='until start'; ptitle=periods[0].name; ptimeStr=`starts ${fmtTime(periods[0].start)}`; plabel='Coming up';
+    const pe=(()=>{for(let i=periods.length-1;i>=0;i--){const e=toMins(periods[i].end)*60;if(nsSec>=e)return e;}return dayStart;})();
+    const pd=nxt.s-pe;
+    pPct=pd>0?Math.round((1-until/pd)*100):0;pCd=fmtCD(until);pSub='until period starts';
+    ptitle=`Passing → ${nxt.p.name}`;ptimeStr=`${nxt.p.name} starts ${fmtTime(nxt.p.start)}`;plabel='Passing period';pCc='passing';
+  }else{
+    pCd=fmtCD(dayStart-nsSec);pSub='until start';ptitle=periods[0].name;ptimeStr=`starts ${fmtTime(periods[0].start)}`;plabel='Coming up';
   }
 
   // custom timer
   const ctLeft=ctSecsLeft();
-  let ctRingHTML='';
+  let ctRing='';
   if(ct.active&&ctLeft!==null){
     const ctPct=ct.totalSecs>0?Math.round((1-ctLeft/ct.totalSecs)*100):100;
     const ctCc=ctLeft<30?'urgent':ctLeft<120?'lunch-color':'custom-timer';
     const ctDone=ctLeft===0&&!ct.paused;
-    if(ctDone&&!prevCtDone) playBell(2);
+    if(ctDone&&!prevCtDone)playBell(2);
     render._lastCtDone=ctDone;
     document.getElementById('ct-status').textContent=ct.paused?'Paused':ctDone?'⏰ Done!':'';
-    ctRingHTML=ringHTML(ctPct,fmtCD(ctLeft),ct.label,ct.paused?'paused':'remaining',ctCc,ringSize,sw,cdFs,pctFs,lblFs);
+    ctRing=ringHTML(ctPct,fmtCD(ctLeft),ct.label,ct.paused?'paused':'remaining',ctCc,ringSize,sw,cdFs,pctFs,lblFs);
   }
 
   const titleColor=pCc==='urgent'?'#dc2626':pCc==='lunch-color'?'#f59e0b':pCc==='passing'?'#0891b2':'#4f46e5';
+  const projClockFz=Math.round(titleFs*1.3);
 
   area.innerHTML=simBanner+`<div class="timer-layout">
-    <div class="proj-clock" style="font-size:${Math.round(titleFs*1.4)}px">${fmtTimeClock(now)}</div>
+    <div class="proj-clock" style="font-size:${clockFs}px;margin-bottom:4px">${fmtClock(now)}</div>
     <div class="period-label">${plabel}</div>
     <div class="period-title" style="color:${titleColor};font-size:${titleFs}px">${ptitle}</div>
     <div class="time-range">${ptimeStr}</div>
     <div class="rings-row" style="flex-direction:${ringsFlexDir}">
-      ${ctRingHTML}
+      ${ctRing}
       ${ringHTML(pPct,pCd,cur?'Current period':nxt?'Passing period':'Coming up',pSub,pCc,ringSize,sw,cdFs,pctFs,lblFs)}
       ${dayRingHTML(periods,nsSec,dayStart,dayEnd,ringSize,sw,cdFs,pctFs,lblFs)}
     </div>
@@ -605,7 +558,7 @@ function ctSecsLeft(){if(!ct.active)return null;if(ct.paused)return ct.pausedSec
 const TYPE_MAP={'regular week':'regular','monday holiday week':'monday_holiday','tuesday holiday week':'tuesday_holiday','friday holiday week':'friday_holiday','monday tuesday holiday week':'monday_tuesday_holiday','conference week':'conference','no school week':'noschool','last week of school':'last_week'};
 function normalizeType(raw){return TYPE_MAP[raw.trim().toLowerCase()]||raw.trim().toLowerCase().replace(/\s+/g,'_');}
 function parseWeekList(text){
-  const results=[];
+  const res=[];
   for(const line of text.split('\n').map(l=>l.trim()).filter(l=>l)){
     if(/week of/i.test(line)&&/schedule/i.test(line))continue;
     let parts=line.split('\t');
@@ -615,9 +568,9 @@ function parseWeekList(text){
     const dm=parts[0].trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(!dm)continue;
     let yr=parseInt(dm[3]);if(yr<100)yr+=2000;
     const d=new Date(yr,parseInt(dm[1])-1,parseInt(dm[2]),12);
-    results.push({mondayStr:mondayOf(d),typeKey:normalizeType(parts.slice(1).join(' '))});
+    res.push({mondayStr:mondayOf(d),typeKey:normalizeType(parts.slice(1).join(' '))});
   }
-  return results;
+  return res;
 }
 function parseSchedulePaste(text){
   const byDay={0:[],1:[],2:[],3:[],4:[]};
@@ -626,7 +579,7 @@ function parseSchedulePaste(text){
     if(parts.length<4)parts=line.split(/\s{2,}/);
     if(parts.length<4){const m=line.match(/^(.+?)\s+(Monday|Tuesday|Wednesday|Thursday|Friday)\s+(\d+:\d+\s*[AP]M)\s+(\d+:\d+\s*[AP]M)$/i);if(m)parts=[m[1],m[2],m[3],m[4]];}
     if(parts.length<4)continue;
-    const di=DAY_NAMES_LC.indexOf(parts[1].trim().toLowerCase())-1;if(di<0||di>4)continue;
+    const di=DAY_LC.indexOf(parts[1].trim().toLowerCase())-1;if(di<0||di>4)continue;
     const start=parse12h(parts[2]),end=parse12h(parts[3]);if(!start||!end)continue;
     const name=/^\d+$/.test(parts[0].trim())?`Period ${parts[0].trim()}`:parts[0].trim();
     byDay[di].push({name,start,end});
@@ -645,14 +598,14 @@ function renderSetupStep(step){
   const body=document.getElementById('setup-body'),footer=document.getElementById('setup-footer'),ind=document.getElementById('setup-step-ind');
   if(step===0){
     ind.textContent='Step 1';
-    body.innerHTML=`<p class="section-label">Paste your week list</p><div class="info-box">Two columns: date (M/D/YY) and schedule type, tab-separated or multi-space.</div><textarea class="setup-textarea" id="wl-paste" placeholder="8/18/25&#9;Regular Week&#10;..."></textarea><div id="wl-msg"></div>`;
+    body.innerHTML=`<p class="section-label">Paste your week list</p><div class="info-box">Two columns: date (M/D/YY) and schedule type, tab-separated.</div><textarea class="setup-textarea" id="wl-paste" placeholder="8/18/25&#9;Regular Week&#10;..."></textarea><div id="wl-msg"></div>`;
     footer.innerHTML=`<button class="btn-secondary" onclick="closeModal('setup-modal')">Cancel</button><button class="btn-primary" onclick="wizNext()">Next →</button>`;
     if(weekList.length)document.getElementById('wl-paste').value=weekList.map(w=>{const d=new Date(w.mondayStr+'T12:00:00');return `${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}\t${prettyType(w.typeKey)}`;}).join('\n');
-  } else {
+  }else{
     const tk=setupTypeKeys[setupTypeIdx];
     ind.textContent=`Step ${setupTypeIdx+2} of ${setupTypeKeys.length+1}`;
     const pills=setupTypeKeys.map((k,i)=>`<span class="progress-step ${i<setupTypeIdx?'done':i===setupTypeIdx?'current':'pending'}">${prettyType(k)}</span>`).join('');
-    body.innerHTML=`<div class="progress-steps">${pills}</div><p style="font-size:15px;font-weight:600;margin-bottom:4px">${prettyType(tk)}</p><div class="info-box">Paste the full schedule for this week type. Format: Name, Day, Start, End (tab or multi-space). Bare numbers become Period N.</div><textarea class="setup-textarea" id="sc-paste" placeholder="Advisory&#9;Monday&#9;9:30 AM&#9;9:56 AM&#10;..."></textarea><div id="sc-msg"></div>`;
+    body.innerHTML=`<div class="progress-steps">${pills}</div><p style="font-size:15px;font-weight:600;margin-bottom:4px">${prettyType(tk)}</p><div class="info-box">Paste the full schedule. Format: Name, Day, Start, End (tab-separated). Bare numbers become Period N.</div><textarea class="setup-textarea" id="sc-paste"></textarea><div id="sc-msg"></div>`;
     const isLast=setupTypeIdx===setupTypeKeys.length-1;
     const nextFn=isLast?'wizFinish()':'wizNext()';
     const nextLbl=isLast?'Save &amp; Finish':'Next →';
@@ -663,18 +616,18 @@ function renderSetupStep(step){
 function wizNext(){
   if(document.getElementById('wl-paste')){
     const parsed=parseWeekList(document.getElementById('wl-paste').value);
-    if(!parsed.length){document.getElementById('wl-msg').innerHTML='<p class="parse-error">No weeks parsed. Check format.</p>';return;}
+    if(!parsed.length){document.getElementById('wl-msg').innerHTML='<p class="parse-error">No weeks parsed.</p>';return;}
     setupWeekList=parsed;const seen=new Set();setupTypeKeys=[];
     for(const w of parsed)if(w.typeKey!=='noschool'&&!seen.has(w.typeKey)){seen.add(w.typeKey);setupTypeKeys.push(w.typeKey);}
     setupTypeIdx=0;setupSchedBuf={};
     for(const tk of setupTypeKeys)if(schedTypes[tk])setupSchedBuf[tk]=schedTypes[tk];
     if(!setupTypeKeys.length){finalizeSetup();return;}
-  } else {if(!bufferSched())return;setupTypeIdx++;}
+  }else{if(!bufferSched())return;setupTypeIdx++;}
   renderSetupStep(1);
 }
 function wizBack(){if(setupTypeIdx>0){setupTypeIdx--;renderSetupStep(1);}else{setupTypeKeys=[];renderSetupStep(0);}}
 function wizFinish(){if(!bufferSched())return;finalizeSetup();}
-function bufferSched(){const text=document.getElementById('sc-paste').value;const r=parseSchedulePaste(text);if(!Object.values(r).some(a=>a.length)){document.getElementById('sc-msg').innerHTML='<p class="parse-error">No periods parsed.</p>';return false;}setupSchedBuf[setupTypeKeys[setupTypeIdx]]=r;return true;}
+function bufferSched(){const r=parseSchedulePaste(document.getElementById('sc-paste').value);if(!Object.values(r).some(a=>a.length)){document.getElementById('sc-msg').innerHTML='<p class="parse-error">No periods parsed.</p>';return false;}setupSchedBuf[setupTypeKeys[setupTypeIdx]]=r;return true;}
 function finalizeSetup(){weekList=setupWeekList;for(const[k,v]of Object.entries(setupSchedBuf))schedTypes[k]=v;saveAll();closeModal('setup-modal');render();}
 
 // ── Override ──────────────────────────────────────────────────
@@ -695,7 +648,6 @@ function clearSim(){simOffset=null;const d=new Date().getDay();viewDay=(d===0||d
 function closeModal(id){document.getElementById(id).style.display='none';}
 
 document.querySelectorAll('.day-btn').forEach(b=>b.addEventListener('click',()=>{viewDay=+b.dataset.day;render();}));
-
 loadAll();
 const _d=new Date().getDay();viewDay=(_d===0||_d===6)?0:_d-1;
 render();
