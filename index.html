@@ -55,7 +55,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sim-banner{background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:6px 14px;font-size:12px;color:#7c3aed;margin-bottom:8px;text-align:center;flex-shrink:0;}
 .timer-layout{display:flex;flex-direction:column;align-items:center;width:100%;gap:2px;}
 .proj-clock{font-variant-numeric:tabular-nums;font-weight:700;text-align:center;}
-.rings-row{display:flex;gap:20px;align-items:flex-start;justify-content:center;}
+.rings-row{display:flex;gap:20px;align-items:center;justify-content:center;}
 .ring-block{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .ring-wrap{position:relative;flex-shrink:0;}
 .ring-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
@@ -389,7 +389,7 @@ function render(){
   const vSz=Math.min(vW,Math.max(0,vH));
 
   let ringSize,ringsFlexDir;
-  if(!isNarrow&&hSz>=100&&hSz>vSz){ringSize=Math.max(60,hSz);ringsFlexDir='row';}
+  if(!isNarrow&&!isMid&&hSz>=100&&hSz>vSz){ringSize=Math.max(60,hSz);ringsFlexDir='row';}
   else{ringSize=Math.max(60,vSz);ringsFlexDir='column';}
 
   const sw=Math.max(6,Math.round(ringSize*0.07));
