@@ -137,11 +137,13 @@ body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa
   </div>
   <div class="main">
     <div class="topbar" id="topbar">
-      <button class="day-btn" data-day="0">Mon</button>
-      <button class="day-btn" data-day="1">Tue</button>
-      <button class="day-btn" data-day="2">Wed</button>
-      <button class="day-btn" data-day="3">Thu</button>
-      <button class="day-btn" data-day="4">Fri</button>
+      <button class="day-btn" data-day="0">Sun</button>
+      <button class="day-btn" data-day="1">Mon</button>
+      <button class="day-btn" data-day="2">Tue</button>
+      <button class="day-btn" data-day="3">Wed</button>
+      <button class="day-btn" data-day="4">Thu</button>
+      <button class="day-btn" data-day="5">Fri</button>
+      <button class="day-btn" data-day="6">Sat</button>
       <div class="spacer"></div>
       <button class="topbar-btn" id="proj-btn" onclick="toggleProjector()">Projector</button>
       <button class="topbar-btn" id="ct-toggle-btn" onclick="toggleCtBar()">+ Timer</button>
@@ -214,9 +216,10 @@ body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa
 </div>
 
 <script>
-const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAY_LC=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+const SHORT_DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const SK_W='bs5_weeks', SK_S='bs5_scheds', SK_O='bs5_wover';
 
 let weekList=[], schedTypes={}, weekOverride=null;
@@ -244,14 +247,16 @@ function loadAll(){try{const w=localStorage.getItem(SK_W),s=localStorage.getItem
 // ── Helpers ───────────────────────────────────────────────────
 function effectiveNow(){return simOffset!==null?new Date(Date.now()+simOffset):new Date();}
 function isWeekend(d){const day=(d||effectiveNow()).getDay();return day===0||day===6;}
-function todayDayIdx(d){const day=(d||effectiveNow()).getDay();return(day===0||day===6)?-1:day-1;}
+function todayDayIdx(d){return (d||effectiveNow()).getDay();} // 0=Sun..6=Sat
 function getViewDate(now){
-  if(!isWeekend(now)){const d=new Date(now);d.setDate(d.getDate()+(viewDay-todayDayIdx(now)));return d;}
-  const mon=new Date(now);mon.setDate(mon.getDate()+(mon.getDay()===0?1:8-mon.getDay())+viewDay);return mon;
+  const d=new Date(now);
+  d.setDate(d.getDate()+(viewDay-todayDayIdx(now)));
+  return d;
 }
 function getViewDateForDay(now,di){
-  if(!isWeekend(now)){const d=new Date(now);d.setDate(d.getDate()+(di-todayDayIdx(now)));return d;}
-  const mon=new Date(now);mon.setDate(mon.getDate()+(mon.getDay()===0?1:8-mon.getDay())+di);return mon;
+  const d=new Date(now);
+  d.setDate(d.getDate()+(di-todayDayIdx(now)));
+  return d;
 }
 function mondayOf(date){const d=new Date(date);d.setHours(12,0,0,0);const day=d.getDay();d.setDate(d.getDate()+(day===0?-6:1-day));return d.toISOString().slice(0,10);}
 function fmtDateLong(date){const dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];return `${dn[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;}
@@ -264,8 +269,21 @@ function parse12h(s){const m=s.trim().match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)retu
 function fmt24to12(t){const[h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
 function prettyType(tk){if(!tk)return'';return tk.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 function getTypeForDate(date){const ms=mondayOf(date);if(weekOverride&&weekOverride.mondayStr===ms)return weekOverride.typeKey;const e=weekList.find(w=>w.mondayStr===ms);return e?e.typeKey:null;}
-function getScheduleForDay(di,date){const tk=getTypeForDate(date);if(!tk||tk==='noschool')return[];const td=schedTypes[tk];if(!td)return[];return td[di]||[];}
-function isNoSchoolDay(di,date){const tk=getTypeForDate(date);if(!tk)return false;if(tk==='noschool')return true;const td=schedTypes[tk];if(!td)return false;return!td[di]||td[di].length===0;}
+function weekdayIdx(di){return di-1;} // convert Sun=0..Sat=6 to Mon=0..Fri=4 (returns -1 for Sun, 5 for Sat)
+function getScheduleForDay(di,date){
+  if(di===0||di===6)return[]; // weekend
+  const tk=getTypeForDate(date);
+  if(!tk||tk==='noschool')return[];
+  const td=schedTypes[tk];if(!td)return[];
+  return td[weekdayIdx(di)]||[];
+}
+function isNoSchoolDay(di,date){
+  if(di===0||di===6)return true;
+  const tk=getTypeForDate(date);
+  if(!tk)return false;if(tk==='noschool')return true;
+  const td=schedTypes[tk];if(!td)return false;
+  return!td[weekdayIdx(di)]||td[weekdayIdx(di)].length===0;
+}
 
 // ── Bell ──────────────────────────────────────────────────────
 function playBell(times){
@@ -353,7 +371,7 @@ function render(){
   const now=effectiveNow();
   const vd=getViewDate(now);
   const effDay=todayDayIdx(now);
-  const isToday=!isWeekend(now)&&viewDay===effDay;
+  const isToday=viewDay===effDay;
   const tk=getTypeForDate(vd);
   const periods=getScheduleForDay(viewDay,vd);
   const noSch=isWeekend(vd)||isNoSchoolDay(viewDay,vd);
@@ -411,13 +429,13 @@ function render(){
   // Build full week schedule for sidebar
   const list=document.getElementById('period-list');
   let sidebarHTML='';
-  for(let di=0;di<5;di++){
+  for(let di=0;di<7;di++){
     const dayVd=getViewDateForDay(now,di);
     const dayPeriods=getScheduleForDay(di,dayVd);
-    const isThisDay=!isWeekend(now)&&di===effDay;
+    const isThisDay=di===effDay;
     const isDaySelected=di===viewDay;
     const noSchDay=isNoSchoolDay(di,dayVd);
-    sidebarHTML+=`<div class="sidebar-day-header${isDaySelected?' sidebar-day-selected':''}" onclick="viewDay=${di};render()">${['Mon','Tue','Wed','Thu','Fri'][di]}</div>`;
+    sidebarHTML+=`<div class="sidebar-day-header${isDaySelected?' sidebar-day-selected':''}" onclick="viewDay=${di};render()">${SHORT_DAYS[di]}</div>`;
     if(noSchDay){
       sidebarHTML+=`<div class="sidebar-no-school">No school</div>`;
     } else if(!dayPeriods.length){
@@ -643,13 +661,13 @@ function clearOverride(){weekOverride=null;saveAll();closeModal('override-modal'
 
 // ── Simulate ──────────────────────────────────────────────────
 function openSim(){const n=effectiveNow();document.getElementById('sim-date').value=n.toISOString().slice(0,10);document.getElementById('sim-time').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;document.getElementById('sim-modal').style.display='flex';}
-function saveSim(){const dv=document.getElementById('sim-date').value,tv=document.getElementById('sim-time').value;if(!dv||!tv){closeModal('sim-modal');return;}const[sh,sm]=tv.split(':').map(Number);const sd=new Date(dv+'T00:00:00');sd.setHours(sh,sm,0,0);simOffset=sd.getTime()-Date.now();const d=sd.getDay();viewDay=(d===0||d===6)?0:d-1;closeModal('sim-modal');render();}
-function clearSim(){simOffset=null;const d=new Date().getDay();viewDay=(d===0||d===6)?0:d-1;closeModal('sim-modal');render();}
+function saveSim(){const dv=document.getElementById('sim-date').value,tv=document.getElementById('sim-time').value;if(!dv||!tv){closeModal('sim-modal');return;}const[sh,sm]=tv.split(':').map(Number);const sd=new Date(dv+'T00:00:00');sd.setHours(sh,sm,0,0);simOffset=sd.getTime()-Date.now();viewDay=sd.getDay();closeModal('sim-modal');render();}
+function clearSim(){simOffset=null;viewDay=new Date().getDay();closeModal('sim-modal');render();}
 function closeModal(id){document.getElementById(id).style.display='none';}
 
 document.querySelectorAll('.day-btn').forEach(b=>b.addEventListener('click',()=>{viewDay=+b.dataset.day;render();}));
 loadAll();
-const _d=new Date().getDay();viewDay=(_d===0||_d===6)?0:_d-1;
+viewDay=new Date().getDay(); // 0=Sun..6=Sat
 render();
 setInterval(render,1000);
 new ResizeObserver(render).observe(document.body);
