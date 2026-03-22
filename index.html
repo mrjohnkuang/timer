@@ -27,8 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .period-name{font-size:13px;font-weight:500;flex:1;}
 .period-time{font-size:11px;color:#aaa;white-space:nowrap;}
 .no-periods{padding:20px 16px;text-align:center;color:#bbb;font-size:13px;line-height:1.6;}
-.sidebar-day-header{padding:6px 16px 4px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;margin-top:4px;border-radius:0;}
-.sidebar-day-header:first-child{margin-top:0;}
+.sidebar-day-header{padding:6px 16px 4px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;margin-top:4px;}
 .sidebar-day-header:hover{color:#4f46e5;}
 .sidebar-day-selected{color:#4f46e5!important;border-left:3px solid #4f46e5;}
 .sidebar-no-school{padding:4px 16px 8px;font-size:12px;color:#bbb;font-style:italic;}
@@ -51,10 +50,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ct-btn.primary{background:#4f46e5;color:#fff;border-color:#4f46e5;}
 .ct-btn.stop{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
 .ct-btn.pause{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
-.timer-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 20px;overflow-y:auto;min-height:0;}
+.timer-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 20px 32px;overflow-y:auto;min-height:0;}
 .sim-banner{background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:6px 14px;font-size:12px;color:#7c3aed;margin-bottom:8px;text-align:center;flex-shrink:0;}
 .timer-layout{display:flex;flex-direction:column;align-items:center;width:100%;gap:2px;}
 .proj-clock{font-variant-numeric:tabular-nums;font-weight:700;text-align:center;}
+body:not(.projector) .proj-clock{color:#1a1a1a;}
+body.projector .proj-clock{color:#fff;}
+.period-label{font-size:13px;color:#aaa;text-align:center;}
+.period-title{font-weight:700;color:#1a1a1a;text-align:center;}
+.time-range{font-size:12px;color:#bbb;margin-bottom:4px;}
 .rings-row{display:flex;gap:20px;align-items:center;justify-content:center;}
 .ring-block{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .ring-wrap{position:relative;flex-shrink:0;}
@@ -82,16 +86,11 @@ body.projector .day-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e
 body.projector .topbar-btn{background:#1a1a24;border-color:#2a2a38;color:#aaa;}
 body.projector .topbar-btn.proj-on{border-color:#059669;color:#34d399;background:#022c22;}
 body.projector .timer-area{background:#0f0f14;}
-.period-label{font-size:13px;color:#aaa;text-align:center;}
-.period-title{font-weight:700;color:#1a1a1a;text-align:center;}
-.time-range{font-size:12px;color:#bbb;margin-bottom:4px;}
-body.projector .proj-clock{color:#fff;}
-body:not(.projector) .proj-clock{color:#1a1a1a;}
+body.projector .period-label{color:#555;}
 body.projector .period-title{color:#fff;}
 body.projector .time-range{color:#444;}
 body.projector .next-up{color:#444;}
 body.projector .next-up strong{color:#777;}
-body.projector .proj-clock{display:block;}
 body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:200;}
 .modal{background:#fff;border-radius:12px;width:640px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;}
@@ -148,6 +147,7 @@ body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa
       <button class="topbar-btn" id="proj-btn" onclick="toggleProjector()">Projector</button>
       <button class="topbar-btn" id="ct-toggle-btn" onclick="toggleCtBar()">+ Timer</button>
       <button class="topbar-btn" id="sim-btn" onclick="openSim()">Simulate</button>
+      <button class="topbar-btn" id="dayov-btn" onclick="openDayOverride()">Day override</button>
       <button class="topbar-btn" id="override-btn" onclick="openOverride()">Week override</button>
       <button class="topbar-btn setup" onclick="openSetup()">Setup</button>
     </div>
@@ -198,6 +198,31 @@ body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa
     </div>
   </div>
 </div>
+<!-- Day Override -->
+<div class="modal-overlay" id="dayov-modal" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>Day schedule override</h3><button class="modal-close" onclick="closeModal('dayov-modal')">×</button></div>
+    <div class="modal-body">
+      <div class="info-box">Set a custom schedule for a specific date. This overrides the week schedule for that day only.</div>
+      <div class="sim-row"><label>Date</label><input type="date" id="dayov-date"></div>
+      <div style="margin-top:12px">
+        <div class="col-labels" style="display:grid;grid-template-columns:1fr 110px 110px 28px;gap:6px;margin-bottom:4px">
+          <span style="font-size:11px;color:#aaa">Period name</span>
+          <span style="font-size:11px;color:#aaa">Start (e.g. 9:30 AM)</span>
+          <span style="font-size:11px;color:#aaa">End (e.g. 10:00 AM)</span>
+          <span></span>
+        </div>
+        <div id="dayov-rows"></div>
+        <button style="width:100%;border:1px dashed #ddd;border-radius:6px;padding:7px;font-size:13px;cursor:pointer;color:#aaa;background:none;margin-top:4px" onclick="dayovAddRow()">+ Add period</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" onclick="dayovClear()">Clear override</button>
+      <button class="btn-secondary" onclick="closeModal('dayov-modal')">Cancel</button>
+      <button class="btn-primary" onclick="dayovSave()">Save</button>
+    </div>
+  </div>
+</div>
 <!-- Simulate -->
 <div class="modal-overlay" id="sim-modal" style="display:none">
   <div class="modal modal-sm">
@@ -217,111 +242,379 @@ body.projector .sim-banner{background:#1a1524;border-color:#4c1d95;color:#a78bfa
 
 <script>
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const SHORT_DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAY_LC=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-const SHORT_DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const SK_W='bs5_weeks', SK_S='bs5_scheds', SK_O='bs5_wover';
+const SK_W='bs6_weeks', SK_S='bs6_scheds', SK_O='bs6_wover';
 
 let weekList=[], schedTypes={}, weekOverride=null;
 let viewDay=0, simOffset=null, projectorOn=false, ctBarOpen=false;
 let ct={active:false,paused:false,endEpoch:null,pausedSecsLeft:null,totalSecs:null,label:''};
-let setupWeekList=[], setupTypeKeys=[], setupTypeIdx=0, setupSchedBuf={}, selOverrideTpl=null;
+let dayOverrides = {}; // {'2026-03-23': [{name, start, end}, ...]}
+const SK_DO = 'bs6_dayov';
 
 // ── Defaults ──────────────────────────────────────────────────
-const DWL=`8/18/25\tRegular Week\n8/25/25\tRegular Week\n9/1/25\tMonday Holiday Week\n9/8/25\tRegular Week\n9/15/25\tRegular Week\n9/22/25\tRegular Week\n9/29/25\tRegular Week\n10/6/25\tRegular Week\n10/13/25\tMonday Holiday Week\n10/20/25\tRegular Week\n10/27/25\tRegular Week\n11/3/25\tRegular Week\n11/10/25\tTuesday Holiday Week\n11/17/25\tConference Week\n11/24/25\tNo School Week\n12/1/25\tRegular Week\n12/8/25\tRegular Week\n12/15/25\tRegular Week\n12/22/25\tNo School Week\n12/29/25\tNo School Week\n1/5/26\tRegular Week\n1/12/26\tRegular Week\n1/19/26\tMonday Holiday Week\n1/26/26\tRegular Week\n2/2/26\tRegular Week\n2/9/26\tRegular Week\n2/16/26\tMonday Tuesday Holiday Week\n2/23/26\tRegular Week\n3/2/26\tConference Week\n3/9/26\tRegular Week\n3/16/26\tRegular Week\n3/23/26\tFriday Holiday Week\n3/30/26\tNo School Week\n4/6/26\tRegular Week\n4/13/26\tRegular Week\n4/20/26\tRegular Week\n4/27/26\tRegular Week\n5/4/26\tRegular Week\n5/11/26\tRegular Week\n5/18/26\tRegular Week\n5/25/26\tMonday Holiday Week\n6/1/26\tLast Week of School`;
-const DST={
-  regular:`Advisory\tMonday\t9:30 AM\t9:56 AM\n1\tMonday\t10:01 AM\t11:17 AM\n2\tMonday\t11:22 AM\t12:38 PM\nLunch\tMonday\t12:38 PM\t1:18 PM\n3\tMonday\t1:23 PM\t2:39 PM\n4\tMonday\t2:44 PM\t4:00 PM\nAdvisory\tTuesday\t9:30 AM\t10:06 AM\n5\tTuesday\t10:11 AM\t11:27 AM\n6\tTuesday\t11:32 AM\t12:48 PM\nLunch\tTuesday\t12:53 PM\t1:28 PM\n7\tTuesday\t1:33 PM\t2:49 PM\n1\tTuesday\t2:54 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:02 AM\n2\tWednesday\t10:07 AM\t11:13 AM\n3\tWednesday\t11:18 AM\t12:24 PM\nLunch\tWednesday\t12:29 PM\t1:04 PM\n4\tWednesday\t1:09 PM\t2:15 PM\n5\tThursday\t9:30 AM\t10:36 AM\n6\tThursday\t10:41 AM\t11:47 AM\n7\tThursday\t11:52 AM\t12:58 PM\nLunch\tThursday\t1:03 PM\t1:38 PM\n1\tThursday\t1:43 PM\t2:49 PM\n2\tThursday\t2:54 PM\t4:00 PM\n3\tFriday\t9:30 AM\t10:36 AM\n4\tFriday\t10:41 AM\t11:47 AM\n5\tFriday\t11:52 AM\t12:58 PM\nLunch\tFriday\t1:03 PM\t1:38 PM\n6\tFriday\t1:43 PM\t2:49 PM\n7\tFriday\t2:54 PM\t4:00 PM`,
-  monday_holiday:`1\tTuesday\t9:30 AM\t10:54 AM\n2\tTuesday\t10:59 AM\t12:23 PM\nLunch\tTuesday\t12:23 PM\t1:02 PM\n3\tTuesday\t1:07 PM\t2:31 PM\n4\tTuesday\t2:36 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:00 AM\n5\tWednesday\t10:05 AM\t11:29 AM\nLunch\tWednesday\t11:29 AM\t12:08 PM\n6\tWednesday\t12:13 PM\t1:37 PM\nAdvisory\tWednesday\t1:42 PM\t2:15 PM\n7\tThursday\t9:30 AM\t10:54 AM\n1\tThursday\t10:59 AM\t12:23 PM\nLunch\tThursday\t12:23 PM\t1:02 PM\n2\tThursday\t1:07 PM\t2:31 PM\n3\tThursday\t2:36 PM\t4:00 PM\n4\tFriday\t9:30 AM\t10:54 AM\n5\tFriday\t10:59 AM\t12:23 PM\nLunch\tFriday\t12:23 PM\t1:02 PM\n6\tFriday\t1:07 PM\t2:31 PM\n7\tFriday\t2:36 PM\t4:00 PM`,
-  tuesday_holiday:`1\tMonday\t9:30 AM\t10:54 AM\n2\tMonday\t10:59 AM\t12:23 PM\nLunch\tMonday\t12:23 PM\t1:02 PM\n3\tMonday\t1:07 PM\t2:31 PM\n4\tMonday\t2:36 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:00 AM\n5\tWednesday\t10:05 AM\t11:29 AM\nLunch\tWednesday\t11:29 AM\t12:08 PM\n6\tWednesday\t12:13 PM\t1:37 PM\nAdvisory\tWednesday\t1:42 PM\t2:15 PM\n7\tThursday\t9:30 AM\t10:54 AM\n1\tThursday\t10:59 AM\t12:23 PM\nLunch\tThursday\t12:23 PM\t1:02 PM\n2\tThursday\t1:07 PM\t2:31 PM\n3\tThursday\t2:36 PM\t4:00 PM\n4\tFriday\t9:30 AM\t10:54 AM\n5\tFriday\t10:59 AM\t12:23 PM\nLunch\tFriday\t12:23 PM\t1:02 PM\n6\tFriday\t1:07 PM\t2:31 PM\n7\tFriday\t2:36 PM\t4:00 PM`,
-  friday_holiday:`4\tMonday\t9:30 AM\t10:54 AM\n5\tMonday\t10:59 AM\t12:23 PM\nLunch\tMonday\t12:23 PM\t1:02 PM\n6\tMonday\t1:07 PM\t2:31 PM\n7\tMonday\t2:36 PM\t4:00 PM\n1\tTuesday\t9:30 AM\t10:54 AM\n2\tTuesday\t10:59 AM\t12:23 PM\nLunch\tTuesday\t12:23 PM\t1:02 PM\n3\tTuesday\t1:07 PM\t2:31 PM\n4\tTuesday\t2:36 PM\t4:00 PM\nAdvisory\tWednesday\t9:30 AM\t10:00 AM\n5\tWednesday\t10:05 AM\t11:29 AM\nLunch\tWednesday\t11:29 AM\t12:08 PM\n6\tWednesday\t12:13 PM\t1:37 PM\nAdvisory\tWednesday\t1:42 PM\t2:15 PM\n7\tThursday\t9:30 AM\t10:54 AM\n1\tThursday\t10:59 AM\t12:23 PM\nLunch\tThursday\t12:23 PM\t1:02 PM\n2\tThursday\t1:07 PM\t2:31 PM\n3\tThursday\t2:36 PM\t4:00 PM`,
-  monday_tuesday_holiday:`4\tWednesday\t9:30 AM\t10:25 AM\n5\tWednesday\t10:30 AM\t11:25 AM\n6\tWednesday\t11:30 AM\t12:25 PM\nLunch\tWednesday\t12:30 PM\t1:15 PM\n7\tWednesday\t1:20 PM\t2:15 PM\n1\tThursday\t9:30 AM\t10:25 AM\n2\tThursday\t10:30 AM\t11:25 AM\n3\tThursday\t11:30 AM\t12:25 PM\nLunch\tThursday\t12:30 PM\t1:15 PM\n4\tThursday\t1:20 PM\t2:15 PM\n5\tThursday\t2:20 PM\t3:15 PM\nAdvisory\tThursday\t3:20 PM\t4:00 PM\n6\tFriday\t9:30 AM\t10:25 AM\n7\tFriday\t10:30 AM\t11:25 AM\n1\tFriday\t11:30 AM\t12:25 PM\nLunch\tFriday\t12:30 PM\t1:15 PM\n2\tFriday\t1:20 PM\t2:15 PM\n3\tFriday\t2:20 PM\t3:15 PM\nAdvisory\tFriday\t3:20 PM\t4:00 PM`,
-  conference:`1\tMonday\t9:30 AM\t10:48 AM\n2\tMonday\t10:53 AM\t12:11 PM\nLunch\tMonday\t12:16 PM\t12:52 PM\n3\tMonday\t12:57 PM\t2:15 PM\n4\tTuesday\t9:30 AM\t10:48 AM\n5\tTuesday\t10:53 AM\t12:11 PM\nLunch\tTuesday\t12:16 PM\t12:52 PM\n6\tTuesday\t12:57 PM\t2:15 PM\n7\tWednesday\t9:30 AM\t10:48 AM\n1\tWednesday\t10:53 AM\t12:11 PM\nLunch\tWednesday\t12:16 PM\t12:52 PM\nAdvisory\tWednesday\t12:57 PM\t2:15 PM\n2\tThursday\t9:30 AM\t10:48 AM\n3\tThursday\t10:53 AM\t12:11 PM\nLunch\tThursday\t12:16 PM\t12:52 PM\n4\tThursday\t12:57 PM\t2:15 PM\n5\tFriday\t9:30 AM\t10:48 AM\n6\tFriday\t10:53 AM\t12:11 PM\nLunch\tFriday\t12:16 PM\t12:52 PM\n7\tFriday\t12:57 PM\t2:15 PM`,
-  last_week:`1\tMonday\t9:30 AM\t10:25 AM\n2\tMonday\t10:30 AM\t11:25 AM\n3\tMonday\t11:30 AM\t12:25 PM\nLunch\tMonday\t12:30 PM\t1:15 PM\n4\tMonday\t1:20 PM\t2:15 PM\n5\tMonday\t2:20 PM\t3:15 PM\nAdvisory\tMonday\t3:20 PM\t4:00 PM\n6\tTuesday\t9:30 AM\t10:25 AM\n7\tTuesday\t10:30 AM\t11:25 AM\n1\tTuesday\t11:30 AM\t12:25 PM\nLunch\tTuesday\t12:30 PM\t1:15 PM\n2\tTuesday\t1:20 PM\t2:15 PM\n3\tTuesday\t2:20 PM\t3:15 PM\nAdvisory\tTuesday\t3:20 PM\t4:00 PM\n4\tWednesday\t9:30 AM\t10:25 AM\n5\tWednesday\t10:30 AM\t11:25 AM\n6\tWednesday\t11:30 AM\t12:25 PM\nLunch\tWednesday\t12:30 PM\t1:15 PM\n7\tWednesday\t1:20 PM\t2:15 PM`
+const DWL = [
+  '8/17/25\tRegular Week',
+  '8/24/25\tRegular Week',
+  '8/31/25\tMonday Holiday Week',
+  '9/7/25\tRegular Week',
+  '9/14/25\tRegular Week',
+  '9/21/25\tRegular Week',
+  '9/28/25\tRegular Week',
+  '10/5/25\tRegular Week',
+  '10/12/25\tMonday Holiday Week',
+  '10/19/25\tRegular Week',
+  '10/26/25\tRegular Week',
+  '11/2/25\tRegular Week',
+  '11/9/25\tTuesday Holiday Week',
+  '11/16/25\tConference Week',
+  '11/23/25\tNo School Week',
+  '11/30/25\tRegular Week',
+  '12/7/25\tRegular Week',
+  '12/14/25\tRegular Week',
+  '12/21/25\tNo School Week',
+  '12/28/25\tNo School Week',
+  '1/4/26\tRegular Week',
+  '1/11/26\tRegular Week',
+  '1/18/26\tMonday Holiday Week',
+  '1/25/26\tRegular Week',
+  '2/1/26\tRegular Week',
+  '2/8/26\tRegular Week',
+  '2/15/26\tMonday Tuesday Holiday Week',
+  '2/22/26\tRegular Week',
+  '3/1/26\tConference Week',
+  '3/8/26\tRegular Week',
+  '3/15/26\tRegular Week',
+  '3/22/26\tFriday Holiday Week',
+  '3/29/26\tNo School Week',
+  '4/5/26\tRegular Week',
+  '4/12/26\tRegular Week',
+  '4/19/26\tRegular Week',
+  '4/26/26\tRegular Week',
+  '5/3/26\tRegular Week',
+  '5/10/26\tRegular Week',
+  '5/17/26\tRegular Week',
+  '5/24/26\tMonday Holiday Week',
+  '5/31/26\tLast Week of School'
+].join('\n');
+
+const DST = {
+  regular: [
+    'Advisory\tMonday\t9:30 AM\t9:56 AM',
+    '1\tMonday\t10:01 AM\t11:17 AM',
+    '2\tMonday\t11:22 AM\t12:38 PM',
+    'Lunch\tMonday\t12:38 PM\t1:18 PM',
+    '3\tMonday\t1:23 PM\t2:39 PM',
+    '4\tMonday\t2:44 PM\t4:00 PM',
+    'Advisory\tTuesday\t9:30 AM\t10:06 AM',
+    '5\tTuesday\t10:11 AM\t11:27 AM',
+    '6\tTuesday\t11:32 AM\t12:48 PM',
+    'Lunch\tTuesday\t12:53 PM\t1:28 PM',
+    '7\tTuesday\t1:33 PM\t2:49 PM',
+    '1\tTuesday\t2:54 PM\t4:00 PM',
+    'Advisory\tWednesday\t9:30 AM\t10:02 AM',
+    '2\tWednesday\t10:07 AM\t11:13 AM',
+    '3\tWednesday\t11:18 AM\t12:24 PM',
+    'Lunch\tWednesday\t12:29 PM\t1:04 PM',
+    '4\tWednesday\t1:09 PM\t2:15 PM',
+    '5\tThursday\t9:30 AM\t10:36 AM',
+    '6\tThursday\t10:41 AM\t11:47 AM',
+    '7\tThursday\t11:52 AM\t12:58 PM',
+    'Lunch\tThursday\t1:03 PM\t1:38 PM',
+    '1\tThursday\t1:43 PM\t2:49 PM',
+    '2\tThursday\t2:54 PM\t4:00 PM',
+    '3\tFriday\t9:30 AM\t10:36 AM',
+    '4\tFriday\t10:41 AM\t11:47 AM',
+    '5\tFriday\t11:52 AM\t12:58 PM',
+    'Lunch\tFriday\t1:03 PM\t1:38 PM',
+    '6\tFriday\t1:43 PM\t2:49 PM',
+    '7\tFriday\t2:54 PM\t4:00 PM'
+  ].join('\n'),
+  monday_holiday: [
+    '1\tTuesday\t9:30 AM\t10:54 AM',
+    '2\tTuesday\t10:59 AM\t12:23 PM',
+    'Lunch\tTuesday\t12:23 PM\t1:02 PM',
+    '3\tTuesday\t1:07 PM\t2:31 PM',
+    '4\tTuesday\t2:36 PM\t4:00 PM',
+    'Advisory\tWednesday\t9:30 AM\t10:00 AM',
+    '5\tWednesday\t10:05 AM\t11:29 AM',
+    'Lunch\tWednesday\t11:29 AM\t12:08 PM',
+    '6\tWednesday\t12:13 PM\t1:37 PM',
+    'Advisory\tWednesday\t1:42 PM\t2:15 PM',
+    '7\tThursday\t9:30 AM\t10:54 AM',
+    '1\tThursday\t10:59 AM\t12:23 PM',
+    'Lunch\tThursday\t12:23 PM\t1:02 PM',
+    '2\tThursday\t1:07 PM\t2:31 PM',
+    '3\tThursday\t2:36 PM\t4:00 PM',
+    '4\tFriday\t9:30 AM\t10:54 AM',
+    '5\tFriday\t10:59 AM\t12:23 PM',
+    'Lunch\tFriday\t12:23 PM\t1:02 PM',
+    '6\tFriday\t1:07 PM\t2:31 PM',
+    '7\tFriday\t2:36 PM\t4:00 PM'
+  ].join('\n'),
+  tuesday_holiday: [
+    '1\tMonday\t9:30 AM\t10:54 AM',
+    '2\tMonday\t10:59 AM\t12:23 PM',
+    'Lunch\tMonday\t12:23 PM\t1:02 PM',
+    '3\tMonday\t1:07 PM\t2:31 PM',
+    '4\tMonday\t2:36 PM\t4:00 PM',
+    'Advisory\tWednesday\t9:30 AM\t10:00 AM',
+    '5\tWednesday\t10:05 AM\t11:29 AM',
+    'Lunch\tWednesday\t11:29 AM\t12:08 PM',
+    '6\tWednesday\t12:13 PM\t1:37 PM',
+    'Advisory\tWednesday\t1:42 PM\t2:15 PM',
+    '7\tThursday\t9:30 AM\t10:54 AM',
+    '1\tThursday\t10:59 AM\t12:23 PM',
+    'Lunch\tThursday\t12:23 PM\t1:02 PM',
+    '2\tThursday\t1:07 PM\t2:31 PM',
+    '3\tThursday\t2:36 PM\t4:00 PM',
+    '4\tFriday\t9:30 AM\t10:54 AM',
+    '5\tFriday\t10:59 AM\t12:23 PM',
+    'Lunch\tFriday\t12:23 PM\t1:02 PM',
+    '6\tFriday\t1:07 PM\t2:31 PM',
+    '7\tFriday\t2:36 PM\t4:00 PM'
+  ].join('\n'),
+  friday_holiday: [
+    '4\tMonday\t9:30 AM\t10:54 AM',
+    '5\tMonday\t10:59 AM\t12:23 PM',
+    'Lunch\tMonday\t12:23 PM\t1:02 PM',
+    '6\tMonday\t1:07 PM\t2:31 PM',
+    '7\tMonday\t2:36 PM\t4:00 PM',
+    '1\tTuesday\t9:30 AM\t10:54 AM',
+    '2\tTuesday\t10:59 AM\t12:23 PM',
+    'Lunch\tTuesday\t12:23 PM\t1:02 PM',
+    '3\tTuesday\t1:07 PM\t2:31 PM',
+    '4\tTuesday\t2:36 PM\t4:00 PM',
+    'Advisory\tWednesday\t9:30 AM\t10:00 AM',
+    '5\tWednesday\t10:05 AM\t11:29 AM',
+    'Lunch\tWednesday\t11:29 AM\t12:08 PM',
+    '6\tWednesday\t12:13 PM\t1:37 PM',
+    'Advisory\tWednesday\t1:42 PM\t2:15 PM',
+    '7\tThursday\t9:30 AM\t10:54 AM',
+    '1\tThursday\t10:59 AM\t12:23 PM',
+    'Lunch\tThursday\t12:23 PM\t1:02 PM',
+    '2\tThursday\t1:07 PM\t2:31 PM',
+    '3\tThursday\t2:36 PM\t4:00 PM'
+  ].join('\n'),
+  monday_tuesday_holiday: [
+    '4\tWednesday\t9:30 AM\t10:25 AM',
+    '5\tWednesday\t10:30 AM\t11:25 AM',
+    '6\tWednesday\t11:30 AM\t12:25 PM',
+    'Lunch\tWednesday\t12:30 PM\t1:15 PM',
+    '7\tWednesday\t1:20 PM\t2:15 PM',
+    '1\tThursday\t9:30 AM\t10:25 AM',
+    '2\tThursday\t10:30 AM\t11:25 AM',
+    '3\tThursday\t11:30 AM\t12:25 PM',
+    'Lunch\tThursday\t12:30 PM\t1:15 PM',
+    '4\tThursday\t1:20 PM\t2:15 PM',
+    '5\tThursday\t2:20 PM\t3:15 PM',
+    'Advisory\tThursday\t3:20 PM\t4:00 PM',
+    '6\tFriday\t9:30 AM\t10:25 AM',
+    '7\tFriday\t10:30 AM\t11:25 AM',
+    '1\tFriday\t11:30 AM\t12:25 PM',
+    'Lunch\tFriday\t12:30 PM\t1:15 PM',
+    '2\tFriday\t1:20 PM\t2:15 PM',
+    '3\tFriday\t2:20 PM\t3:15 PM',
+    'Advisory\tFriday\t3:20 PM\t4:00 PM'
+  ].join('\n'),
+  conference: [
+    '1\tMonday\t9:30 AM\t10:48 AM',
+    '2\tMonday\t10:53 AM\t12:11 PM',
+    'Lunch\tMonday\t12:16 PM\t12:52 PM',
+    '3\tMonday\t12:57 PM\t2:15 PM',
+    '4\tTuesday\t9:30 AM\t10:48 AM',
+    '5\tTuesday\t10:53 AM\t12:11 PM',
+    'Lunch\tTuesday\t12:16 PM\t12:52 PM',
+    '6\tTuesday\t12:57 PM\t2:15 PM',
+    '7\tWednesday\t9:30 AM\t10:48 AM',
+    '1\tWednesday\t10:53 AM\t12:11 PM',
+    'Lunch\tWednesday\t12:16 PM\t12:52 PM',
+    'Advisory\tWednesday\t12:57 PM\t2:15 PM',
+    '2\tThursday\t9:30 AM\t10:48 AM',
+    '3\tThursday\t10:53 AM\t12:11 PM',
+    'Lunch\tThursday\t12:16 PM\t12:52 PM',
+    '4\tThursday\t12:57 PM\t2:15 PM',
+    '5\tFriday\t9:30 AM\t10:48 AM',
+    '6\tFriday\t10:53 AM\t12:11 PM',
+    'Lunch\tFriday\t12:16 PM\t12:52 PM',
+    '7\tFriday\t12:57 PM\t2:15 PM'
+  ].join('\n'),
+  last_week: [
+    '1\tMonday\t9:30 AM\t10:25 AM',
+    '2\tMonday\t10:30 AM\t11:25 AM',
+    '3\tMonday\t11:30 AM\t12:25 PM',
+    'Lunch\tMonday\t12:30 PM\t1:15 PM',
+    '4\tMonday\t1:20 PM\t2:15 PM',
+    '5\tMonday\t2:20 PM\t3:15 PM',
+    'Advisory\tMonday\t3:20 PM\t4:00 PM',
+    '6\tTuesday\t9:30 AM\t10:25 AM',
+    '7\tTuesday\t10:30 AM\t11:25 AM',
+    '1\tTuesday\t11:30 AM\t12:25 PM',
+    'Lunch\tTuesday\t12:30 PM\t1:15 PM',
+    '2\tTuesday\t1:20 PM\t2:15 PM',
+    '3\tTuesday\t2:20 PM\t3:15 PM',
+    'Advisory\tTuesday\t3:20 PM\t4:00 PM',
+    '4\tWednesday\t9:30 AM\t10:25 AM',
+    '5\tWednesday\t10:30 AM\t11:25 AM',
+    '6\tWednesday\t11:30 AM\t12:25 PM',
+    'Lunch\tWednesday\t12:30 PM\t1:15 PM',
+    '7\tWednesday\t1:20 PM\t2:15 PM'
+  ].join('\n')
 };
-function loadDefaults(){
-  weekList=parseWeekList(DWL);
-  schedTypes={};
-  for(const[k,v]of Object.entries(DST)){
-    const parsed=parseSchedulePaste(v);
-    schedTypes[k]=parsed;
+
+function loadDefaults() {
+  weekList = parseWeekList(DWL);
+  schedTypes = {};
+  for (const [k,v] of Object.entries(DST)) {
+    schedTypes[k] = parseSchedulePaste(v);
   }
 }
 
 // ── Persistence ───────────────────────────────────────────────
-function saveAll(){try{localStorage.setItem(SK_W,JSON.stringify(weekList));localStorage.setItem(SK_S,JSON.stringify(schedTypes));localStorage.setItem(SK_O,JSON.stringify(weekOverride));}catch(e){}}
-function loadAll(){try{const w=localStorage.getItem(SK_W),s=localStorage.getItem(SK_S),o=localStorage.getItem(SK_O);if(w)weekList=JSON.parse(w);if(s)schedTypes=JSON.parse(s);if(o)weekOverride=JSON.parse(o);}catch(e){}if(!weekList.length||!Object.keys(schedTypes).length)loadDefaults();}
+function saveAll() {
+  try {
+    localStorage.setItem(SK_W, JSON.stringify(weekList));
+    localStorage.setItem(SK_S, JSON.stringify(schedTypes));
+    localStorage.setItem(SK_O, JSON.stringify(weekOverride));
+    localStorage.setItem(SK_DO, JSON.stringify(dayOverrides));
+  } catch(e) {}
+}
+function loadAll() {
+  try {
+    const w=localStorage.getItem(SK_W),s=localStorage.getItem(SK_S),o=localStorage.getItem(SK_O),d=localStorage.getItem(SK_DO);
+    if(w)weekList=JSON.parse(w); if(s)schedTypes=JSON.parse(s); if(o)weekOverride=JSON.parse(o); if(d)dayOverrides=JSON.parse(d);
+  } catch(e) {}
+  if(!weekList.length||!Object.keys(schedTypes).length){loadDefaults();saveAll();}
+}
 
-// ── Helpers ───────────────────────────────────────────────────
-function effectiveNow(){return simOffset!==null?new Date(Date.now()+simOffset):new Date();}
-function isWeekend(d){const day=(d||effectiveNow()).getDay();return day===0||day===6;}
-function todayDayIdx(d){return (d||effectiveNow()).getDay();} // 0=Sun..6=Sat
-function getViewDate(now){
-  const d=new Date(now);
-  d.setDate(d.getDate()+(viewDay-todayDayIdx(now)));
+// ── Time helpers ──────────────────────────────────────────────
+function effectiveNow() { return simOffset !== null ? new Date(Date.now()+simOffset) : new Date(); }
+function isWeekend(d) { const day=(d||effectiveNow()).getDay(); return day===0||day===6; }
+function todayDayIdx(d) { return (d||effectiveNow()).getDay(); }
+
+function getViewDate(now) {
+  // Find Sunday of the current week, then add viewDay offset
+  const sun = new Date(now);
+  sun.setDate(now.getDate() - now.getDay());
+  sun.setHours(12,0,0,0);
+  const d = new Date(sun);
+  d.setDate(sun.getDate() + viewDay);
   return d;
 }
-function getViewDateForDay(now,di){
-  const d=new Date(now);
-  d.setDate(d.getDate()+(di-todayDayIdx(now)));
+function getViewDateForDay(now, di) {
+  const sun = new Date(now);
+  sun.setDate(now.getDate() - now.getDay());
+  sun.setHours(12,0,0,0);
+  const d = new Date(sun);
+  d.setDate(sun.getDate() + di);
   return d;
 }
-function mondayOf(date){const d=new Date(date);d.setHours(12,0,0,0);const day=d.getDay();d.setDate(d.getDate()+(day===0?-6:1-day));return d.toISOString().slice(0,10);}
-function fmtDateLong(date){const dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];return `${dn[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;}
-function fmtClock(date){let h=date.getHours(),m=date.getMinutes();const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${String(m).padStart(2,'0')} ${ap}`;}
-function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
-function fmtCD(s,showSecs=true){s=Math.max(0,Math.round(s));return showSecs?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:`${Math.floor(s/60)}m`;}
-function fmtTime(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'pm':'am'}`;}
-function isLunch(p){return p.name.toLowerCase().includes('lunch');}
-function parse12h(s){const m=s.trim().match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return null;let h=parseInt(m[1]),mn=parseInt(m[2]);const pm=m[3].toUpperCase()==='PM';if(pm&&h!==12)h+=12;if(!pm&&h===12)h=0;return `${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;}
-function fmt24to12(t){const[h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
-function prettyType(tk){if(!tk)return'';return tk.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
-function getTypeForDate(date){const ms=mondayOf(date);if(weekOverride&&weekOverride.mondayStr===ms)return weekOverride.typeKey;const e=weekList.find(w=>w.mondayStr===ms);return e?e.typeKey:null;}
-function weekdayIdx(di){return di;} // di is already 0=Sun..6=Sat matching getDay()
-function getScheduleForDay(di,date){
-  if(di===0||di===6){
-    // Check if a custom schedule exists for this weekend day
-    const tk=getTypeForDate(date);
-    if(!tk||tk==='noschool')return[];
-    const td=schedTypes[tk];if(!td)return[];
-    return td[di]||[];
+function sundayOf(date) {
+  const d = new Date(date);
+  d.setHours(12,0,0,0);
+  d.setDate(d.getDate() - d.getDay());
+  return d.toISOString().slice(0,10);
+}
+function weekKey(date) { return sundayOf(date); }
+// Keep mondayOf for any legacy use
+function mondayOf(date) { return sundayOf(date); }
+
+function fmtDateLong(date) {
+  return `${DAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+function fmtClock(date) {
+  let h=date.getHours(), m=date.getMinutes();
+  const ap=h>=12?'PM':'AM'; h=h%12||12;
+  return `${h}:${String(m).padStart(2,'0')} ${ap}`;
+}
+function toMins(t) { const[h,m]=t.split(':').map(Number); return h*60+m; }
+function fmtCD(s, showSecs=true) {
+  s=Math.max(0,Math.round(s));
+  return showSecs ? `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` : `${Math.floor(s/60)}m`;
+}
+function fmtTime(t) {
+  if (!t) return '';
+  const [h,m]=t.split(':').map(Number);
+  return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'pm':'am'}`;
+}
+function isLunch(p) { return p.name.toLowerCase().includes('lunch'); }
+function parse12h(s) {
+  const m=s.trim().match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!m) return null;
+  let h=parseInt(m[1]), mn=parseInt(m[2]);
+  const pm=m[3].toUpperCase()==='PM';
+  if (pm&&h!==12) h+=12;
+  if (!pm&&h===12) h=0;
+  return `${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;
+}
+function fmt24to12(t) {
+  const [h,m]=t.split(':').map(Number);
+  return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+}
+function prettyType(tk) {
+  if (!tk) return '';
+  return tk.replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+// ── Schedule lookup ───────────────────────────────────────────
+function getTypeForDate(date) {
+  const ws = weekKey(date);
+  if (weekOverride && weekOverride.sundayStr===ws) return weekOverride.typeKey;
+  const e = weekList.find(w => w.sundayStr===ws);
+  return e ? e.typeKey : null;
+}
+function getScheduleForDay(di, date) {
+  // Check day override first
+  const ds = date.toISOString().slice(0,10);
+  if (dayOverrides[ds]) return dayOverrides[ds];
+  if (di===0||di===6) {
+    const tk=getTypeForDate(date); if(!tk||tk==='noschool')return[];
+    const td=schedTypes[tk]; if(!td)return[]; return td[di]||[];
   }
-  const tk=getTypeForDate(date);
-  if(!tk||tk==='noschool')return[];
-  const td=schedTypes[tk];if(!td)return[];
-  return td[di]||[];
+  const tk=getTypeForDate(date); if(!tk||tk==='noschool')return[];
+  const td=schedTypes[tk]; if(!td)return[]; return td[di]||[];
 }
-function isNoSchoolDay(di,date){
-  const tk=getTypeForDate(date);
-  if(!tk)return false;if(tk==='noschool')return true;
-  const td=schedTypes[tk];if(!td)return true;
-  return!td[di]||td[di].length===0;
+function isNoSchoolDay(di, date) {
+  const ds=date.toISOString().slice(0,10);
+  if(dayOverrides[ds]) return dayOverrides[ds].length===0;
+  const tk=getTypeForDate(date); if(!tk)return false; if(tk==='noschool')return true;
+  const td=schedTypes[tk]; if(!td)return true; return!td[di]||td[di].length===0;
 }
 
 // ── Bell ──────────────────────────────────────────────────────
-function playBell(times){
-  times=times||1;
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const strike=(off)=>{
-      const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
-      o.type='sine';o.frequency.setValueAtTime(880,ctx.currentTime+off);o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+off+1.2);
-      g.gain.setValueAtTime(0.6,ctx.currentTime+off);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+off+2);
-      o.start(ctx.currentTime+off);o.stop(ctx.currentTime+off+2);
-      const o2=ctx.createOscillator(),g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);
-      o2.type='sine';o2.frequency.setValueAtTime(1320,ctx.currentTime+off);o2.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+off+0.8);
-      g2.gain.setValueAtTime(0.25,ctx.currentTime+off);g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+off+1.2);
-      o2.start(ctx.currentTime+off);o2.stop(ctx.currentTime+off+1.2);
+function playBell(times) {
+  times = times||1;
+  try {
+    const ctx = new(window.AudioContext||window.webkitAudioContext)();
+    const strike = (off) => {
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(880, ctx.currentTime+off);
+      o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime+off+1.2);
+      g.gain.setValueAtTime(0.6, ctx.currentTime+off);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+off+2);
+      o.start(ctx.currentTime+off); o.stop(ctx.currentTime+off+2);
+      const o2=ctx.createOscillator(), g2=ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.type='sine';
+      o2.frequency.setValueAtTime(1320, ctx.currentTime+off);
+      o2.frequency.exponentialRampToValueAtTime(660, ctx.currentTime+off+0.8);
+      g2.gain.setValueAtTime(0.25, ctx.currentTime+off);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+off+1.2);
+      o2.start(ctx.currentTime+off); o2.stop(ctx.currentTime+off+1.2);
     };
-    for(let i=0;i<times;i++)strike(i*0.6);
-  }catch(e){}
+    for (let i=0;i<times;i++) strike(i*0.6);
+  } catch(e) {}
 }
 
 // ── Ring builders ─────────────────────────────────────────────
-function ringHTML(pct,cd,label,sublabel,colorCls,sz,sw,cdFs,pctFs,lblFs){
-  const r=sz*0.42,c=2*Math.PI*r,off=(c*(1-pct/100)).toFixed(2);
-  const stroke=colorCls==='urgent'?'#dc2626':colorCls==='lunch-color'?'#f59e0b':colorCls==='day-color'?'#a5b4fc':colorCls==='passing'?'#0891b2':colorCls==='custom-timer'?'#059669':'#4f46e5';
-  const track=colorCls==='day-color'?'#e8e8f8':'#eeeeee';
-  const cx=sz/2,cy=sz/2;
+function ringHTML(pct, cd, label, sublabel, colorCls, sz, sw, cdFs, pctFs, lblFs) {
+  const r=sz*0.42, c=2*Math.PI*r, off=(c*(1-pct/100)).toFixed(2);
+  const stroke = colorCls==='urgent'?'#dc2626':colorCls==='lunch-color'?'#f59e0b':colorCls==='day-color'?'#a5b4fc':colorCls==='passing'?'#0891b2':colorCls==='custom-timer'?'#059669':'#4f46e5';
+  const track = colorCls==='day-color'?'#e8e8f8':'#eeeeee';
+  const cx=sz/2, cy=sz/2;
   return `<div class="ring-block">
     <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;text-align:center">${label}</div>
     <div class="ring-wrap" style="width:${sz}px;height:${sz}px">
@@ -339,28 +632,31 @@ function ringHTML(pct,cd,label,sublabel,colorCls,sz,sw,cdFs,pctFs,lblFs){
   </div>`;
 }
 
-function dayRingHTML(periods,nsSec,dayStart,dayEnd,sz,sw,cdFs,pctFs,lblFs){
-  const r=sz*0.42,cx=sz/2,cy=sz/2,c=2*Math.PI*r;
-  const total=dayEnd-dayStart,elapsed=Math.min(total,Math.max(0,nsSec-dayStart));
+function dayRingHTML(periods, nsSec, dayStart, dayEnd, sz, sw, cdFs, pctFs, lblFs) {
+  const r=sz*0.42, cx=sz/2, cy=sz/2, c=2*Math.PI*r;
+  const total=dayEnd-dayStart, elapsed=Math.min(total,Math.max(0,nsSec-dayStart));
   const dayPct=Math.round(elapsed/total*100);
   const left=Math.max(0,dayEnd-nsSec);
-  const dayCd=fmtCD(left,left<60);
-  const clr={class:projectorOn?'#6366f1':'#4f46e5',passing:projectorOn?'#0e7490':'#0891b2',lunch:'#f59e0b'};
+  const dayCd=fmtCD(left, left<60);
+  const clr={class:projectorOn?'#6366f1':'#4f46e5', passing:projectorOn?'#0e7490':'#0891b2', lunch:'#f59e0b'};
   const track=projectorOn?'#1e1e2e':'#e8e8f8';
   let arcs=`<circle fill="none" stroke="${track}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}"/>`;
   const drawSeg=(s,e,type)=>{
-    const ss=Math.max(dayStart,s),ee=Math.min(nsSec,e);
-    if(ee<=ss)return;
-    const sf=(ss-dayStart)/total,ef=(ee-dayStart)/total;
+    const ss=Math.max(dayStart,s), ee=Math.min(nsSec,e);
+    if (ee<=ss) return;
+    const sf=(ss-dayStart)/total, ef=(ee-dayStart)/total;
     const arcLen=(ef-sf)*c;
     arcs+=`<circle fill="none" stroke="${clr[type]}" stroke-width="${sw}" cx="${cx}" cy="${cy}" r="${r}" stroke-dasharray="${arcLen.toFixed(2)} ${(c-arcLen).toFixed(2)}" transform="rotate(${(sf*360-90).toFixed(2)} ${cx} ${cy})"/>`;
   };
-  for(let i=0;i<periods.length;i++){
-    const ps=toMins(periods[i].start)*60,pe=toMins(periods[i].end)*60;
-    drawSeg(ps,pe,isLunch(periods[i])?'lunch':'class');
-    if(i<periods.length-1){const ns2=toMins(periods[i+1].start)*60;if(ns2>pe)drawSeg(pe,ns2,'passing');}
+  for (let i=0;i<periods.length;i++) {
+    const ps=toMins(periods[i].start)*60, pe=toMins(periods[i].end)*60;
+    drawSeg(ps, pe, isLunch(periods[i])?'lunch':'class');
+    if (i<periods.length-1) {
+      const ns2=toMins(periods[i+1].start)*60;
+      if (ns2>pe) drawSeg(pe, ns2, 'passing');
+    }
   }
-  const dotFrac=elapsed/total,dotAngle=dotFrac*2*Math.PI-Math.PI/2;
+  const dotFrac=elapsed/total, dotAngle=dotFrac*2*Math.PI-Math.PI/2;
   arcs+=`<circle fill="${projectorOn?'#fff':'#1a1a1a'}" cx="${(cx+r*Math.cos(dotAngle)).toFixed(2)}" cy="${(cy+r*Math.sin(dotAngle)).toFixed(2)}" r="${(sw/2+1).toFixed(1)}"/>`;
   const lgd=[{c:clr.class,l:'Class'},{c:clr.passing,l:'Passing'},{c:clr.lunch,l:'Lunch'}];
   const legend=`<div style="display:flex;gap:8px;justify-content:center;margin-top:4px">${lgd.map(l=>`<span style="font-size:${Math.max(9,lblFs-1)}px;color:${projectorOn?'#555':'#aaa'};display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.c}"></span>${l.l}</span>`).join('')}</div>`;
@@ -379,116 +675,103 @@ function dayRingHTML(periods,nsSec,dayStart,dayEnd,sz,sw,cdFs,pctFs,lblFs){
 }
 
 // ── Main render ───────────────────────────────────────────────
-function render(){
-  const now=effectiveNow();
-  const vd=getViewDate(now);
-  const effDay=todayDayIdx(now);
-  const isToday=viewDay===effDay;
-  const tk=getTypeForDate(vd);
-  const periods=getScheduleForDay(viewDay,vd);
-  const noSch=isWeekend(vd)||isNoSchoolDay(viewDay,vd);
+function render() {
+  const now    = effectiveNow();
+  const vd     = getViewDate(now);
+  const effDay = todayDayIdx(now);
+  const isToday = viewDay===effDay;
+  const tk      = getTypeForDate(vd);
+  const periods = getScheduleForDay(viewDay, vd);
+  const noSch   = isNoSchoolDay(viewDay, vd);
 
-  // ── Sizing — all variables declared here, nothing before this uses them ──
+  // ── Sizing ──
   const W=window.innerWidth, H=window.innerHeight;
   const isNarrow=W<700, isMid=W>=700&&W<960;
   const sideEl=document.getElementById('sidebar');
-  if(projectorOn||isNarrow) sideEl.style.cssText='width:0;min-width:0;overflow:hidden;border-right:none;';
-  else if(isMid) sideEl.style.cssText='width:200px;min-width:200px;overflow:hidden;';
+  if (projectorOn||isNarrow) sideEl.style.cssText='width:0;min-width:0;overflow:hidden;border-right:none;';
+  else if (isMid) sideEl.style.cssText='width:200px;min-width:200px;overflow:hidden;';
   else sideEl.style.cssText='width:260px;min-width:260px;overflow:hidden;';
   const sideW=projectorOn||isNarrow?0:isMid?200:260;
-  const aW=W-sideW-40; // available width for rings area
-  const ctHidden=document.getElementById('ct-bar').classList.contains('hidden');
-  const usedH=document.getElementById('topbar').offsetHeight+(ctHidden?0:document.getElementById('ct-bar').offsetHeight);
-  const aH=H-usedH; // available height for entire timer area
+  const aW=W-sideW-40;
   const numRings=2+(ct.active?1:0);
   const ringOH=100;
   const timerAreaH=document.getElementById('timer-area').clientHeight;
-  // Clock is always shown now — projector gets bigger version
   const clockFs=projectorOn?Math.round(timerAreaH*0.09):Math.round(timerAreaH*0.055);
   const titleFsProv=Math.max(18,Math.min(48,Math.round(aW*0.045)));
   const simH=simOffset!==null?40:0;
   const aboveH=simH+clockFs+24+18+titleFsProv+18+14;
   const freeH=timerAreaH-aboveH-40;
-
   const hW=Math.floor((aW-numRings*28)/numRings);
   const hH=freeH-ringOH;
   const hSz=Math.min(hW,hH);
-
   const vW=Math.floor(aW*0.82);
   const vH=Math.floor((freeH-numRings*ringOH)/numRings);
   const vSz=Math.min(vW,Math.max(0,vH));
-
-  let ringSize,ringsFlexDir;
-  if(!isNarrow&&!isMid&&hSz>=100&&hSz>vSz){ringSize=Math.max(60,hSz);ringsFlexDir='row';}
-  else{ringSize=Math.max(60,vSz);ringsFlexDir='column';}
-
+  let ringSize, ringsFlexDir;
+  if (!isNarrow&&!isMid&&hSz>=100&&hSz>vSz) { ringSize=Math.max(60,hSz); ringsFlexDir='row'; }
+  else { ringSize=Math.max(60,vSz); ringsFlexDir='column'; }
   const sw=Math.max(6,Math.round(ringSize*0.07));
   const cdFs=Math.max(16,Math.round(ringSize*0.19));
   const pctFs=Math.max(10,Math.round(ringSize*0.085));
   const lblFs=Math.max(10,Math.round(ringSize*0.09));
   const titleFs=Math.max(18,Math.min(48,Math.round(ringSize*0.3)));
 
-  // ── Sidebar content ──
+  // ── Sidebar ──
   document.getElementById('sidebar-time').textContent=fmtClock(now);
   document.getElementById('sidebar-date').textContent=fmtDateLong(vd);
-  let bc='regular',bl='Regular week';
-  if(!tk){bc='regular';bl='No schedule data';}
-  else if(tk==='noschool'){bc='noschool';bl='No School Week';}
-  else if(weekOverride&&weekOverride.mondayStr===mondayOf(vd)){bc='override';bl='Override: '+prettyType(tk);}
-  else if(tk!=='regular'){bc='special';bl=prettyType(tk);}
+  let bc='regular', bl='Regular week';
+  if (!tk) { bc='regular'; bl='No schedule data'; }
+  else if (tk==='noschool') { bc='noschool'; bl='No School Week'; }
+  else if (weekOverride&&weekOverride.sundayStr===weekKey(vd)) { bc='override'; bl='Override: '+prettyType(tk); }
+  else if (tk!=='regular') { bc='special'; bl=prettyType(tk); }
   document.getElementById('sidebar-badge').innerHTML=`<span class="week-badge ${bc}">${bl}</span>`;
 
-  // Build full week schedule for sidebar
-  const list=document.getElementById('period-list');
+  // Sidebar week: anchor all days to the same week as viewDay's date
+  const anchorDate = getViewDate(now); // the date for the currently selected tab
+  const anchorSunday = new Date(anchorDate);
+  anchorSunday.setDate(anchorDate.getDate() - anchorDate.getDay()); // roll back to Sunday
+  anchorSunday.setHours(12,0,0,0);
+
   let sidebarHTML='';
-  for(let di=0;di<7;di++){
-    const dayVd=getViewDateForDay(now,di);
+  for (let di=0;di<7;di++) {
+    const dayVd = new Date(anchorSunday);
+    dayVd.setDate(anchorSunday.getDate() + di);
     const dayPeriods=getScheduleForDay(di,dayVd);
     const isThisDay=di===effDay;
     const isDaySelected=di===viewDay;
     const noSchDay=isNoSchoolDay(di,dayVd);
     sidebarHTML+=`<div class="sidebar-day-header${isDaySelected?' sidebar-day-selected':''}" onclick="viewDay=${di};render()">${SHORT_DAYS[di]}</div>`;
-    if(noSchDay){
+    if (noSchDay) {
       sidebarHTML+=`<div class="sidebar-no-school">No school</div>`;
-    } else if(!dayPeriods.length){
-      sidebarHTML+=`<div class="sidebar-no-school">No schedule</div>`;
     } else {
       const nsDay=isThisDay?(now.getHours()*3600+now.getMinutes()*60+now.getSeconds()):-1;
       sidebarHTML+=dayPeriods.map(p=>{
-        const s=toMins(p.start)*60,e=toMins(p.end)*60;
+        const s=toMins(p.start)*60, e=toMins(p.end)*60;
         let cls='upcoming';
-        if(nsDay>=0){if(nsDay>e)cls='past';else if(nsDay>=s)cls='current';}
+        if (nsDay>=0){if(nsDay>e)cls='past';else if(nsDay>=s)cls='current';}
         return `<div class="period-item ${cls}${isLunch(p)?' lunch':''}"><div class="period-dot"></div><div class="period-name">${p.name}</div><div class="period-time">${fmtTime(p.start)}</div></div>`;
       }).join('');
     }
   }
-  list.innerHTML=sidebarHTML;
+  document.getElementById('period-list').innerHTML=sidebarHTML;
 
   // ── Topbar ──
-  const hasOv=!!(weekOverride&&weekOverride.mondayStr===mondayOf(now));
-  const ob=document.getElementById('override-btn');ob.classList.toggle('warn',hasOv);ob.textContent=hasOv?'Override active':'Week override';
-  const simb=document.getElementById('sim-btn');simb.classList.toggle('active-state',simOffset!==null);simb.textContent=simOffset!==null?'Simulating…':'Simulate';
-  const pb=document.getElementById('proj-btn');pb.classList.toggle('proj-on',projectorOn);pb.textContent=projectorOn?'Exit projector':'Projector';
-  document.getElementById('ct-toggle-btn').classList.toggle('active-state',ctBarOpen);
-  document.querySelectorAll('.day-btn').forEach(b=>{
-    const di=+b.dataset.day;
-    b.classList.toggle('active',di===viewDay);
-    b.classList.toggle('noschool',isNoSchoolDay(di,getViewDateForDay(now,di)));
-  });
-
-  // ── Timer area ──
+  const dayovBtn=document.getElementById('dayov-btn');
+  const viewDateStr=vd.toISOString().slice(0,10);
+  dayovBtn.classList.toggle('warn', !!dayOverrides[viewDateStr]);
+  dayovBtn.textContent=dayOverrides[viewDateStr]?'Day override ✓':'Day override';
   const area=document.getElementById('timer-area');
   const simBanner=simOffset!==null?`<div class="sim-banner">Simulation — ${fmtDateLong(now)} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</div>`:'';
 
-  if(!tk&&Object.keys(schedTypes).length===0){
+  if (!tk&&Object.keys(schedTypes).length===0) {
     area.innerHTML=`<div style="text-align:center;color:#bbb;max-width:300px"><div style="font-size:38px;margin-bottom:12px">🗓️</div><p style="font-size:16px;color:#666;margin-bottom:8px">No schedule loaded.</p><p style="font-size:13px">Click <strong>Setup</strong> to get started.</p></div>`;
     return;
   }
-  if(!periods.length){
-    area.innerHTML=simBanner+`<div style="text-align:center"><div style="font-size:38px;margin-bottom:10px">${noSch?'🏖️':'📋'}</div><p style="font-size:16px;color:#999">${noSch?'No school.':'No periods for '+DAYS[viewDay]+'.'}</p>${isWeekend(now)?'<p style="font-size:12px;color:#bbb;margin-top:6px">Previewing next week</p>':''}</div>`;
+  if (!periods.length) {
+    area.innerHTML=simBanner+`<div style="text-align:center"><div style="font-size:38px;margin-bottom:10px">${noSch?'🏖️':'📋'}</div><p style="font-size:16px;color:#999">${noSch?'No school.':'No periods for '+DAYS[viewDay]+'.'}</p></div>`;
     return;
   }
-  if(!isToday){
+  if (!isToday) {
     area.innerHTML=`<div style="max-width:400px;width:100%"><p style="color:#aaa;font-size:12px;text-align:center;margin-bottom:8px">${DAYS[viewDay]} — ${prettyType(tk||'')}</p>${periods.map(p=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f5f5f5;font-size:13px"><span style="font-weight:500${isLunch(p)?';color:#f59e0b':''}">${p.name}</span><span style="color:#bbb;font-size:12px">${fmtTime(p.start)} – ${fmtTime(p.end)}</span></div>`).join('')}</div>`;
     return;
   }
@@ -497,60 +780,56 @@ function render(){
   const dayStart=toMins(periods[0].start)*60;
   const dayEnd=toMins(periods[periods.length-1].end)*60;
 
-  if(nsSec>dayEnd){
+  if (nsSec>dayEnd) {
     area.innerHTML=simBanner+`<div style="text-align:center"><div style="font-size:44px;margin-bottom:10px">🎉</div><p style="font-size:24px;font-weight:700;margin-bottom:6px">School's done!</p><p style="color:#bbb">All periods complete.</p></div>`;
     return;
   }
 
-  let cur=null,nxt=null;
-  for(let i=0;i<periods.length;i++){
-    const s=toMins(periods[i].start)*60,e=toMins(periods[i].end)*60;
-    if(nsSec>=s&&nsSec<e)cur={p:periods[i],s,e};
-    else if(nsSec<s&&!nxt)nxt={p:periods[i],s,e};
+  let cur=null, nxt=null;
+  for (let i=0;i<periods.length;i++) {
+    const s=toMins(periods[i].start)*60, e=toMins(periods[i].end)*60;
+    if (nsSec>=s&&nsSec<e) cur={p:periods[i],s,e};
+    else if (nsSec<s&&!nxt) nxt={p:periods[i],s,e};
   }
 
-  // bell
-  const prevIdx=render._lastIdx??-1,prevCtDone=render._lastCtDone??false;
+  const prevIdx=render._lastIdx??-1, prevCtDone=render._lastCtDone??false;
   const curIdx=cur?periods.indexOf(cur.p):-1;
-  if(isToday){
-    if(prevIdx>=0&&curIdx!==prevIdx)playBell();
-    if(prevIdx>=0&&nsSec>dayEnd&&(render._lastSec??0)<=dayEnd)playBell();
+  if (isToday) {
+    if (prevIdx>=0&&curIdx!==prevIdx) playBell();
+    if (prevIdx>=0&&nsSec>dayEnd&&(render._lastSec??0)<=dayEnd) playBell();
   }
-  render._lastIdx=curIdx;render._lastSec=nsSec;
+  render._lastIdx=curIdx; render._lastSec=nsSec;
 
-  // period ring values
-  let pPct=0,pCd='0:00',pSub='',pCc='',ptitle='',ptimeStr='',plabel='Now';
-  if(cur){
-    const left=cur.e-nsSec,tot=cur.e-cur.s;
-    pPct=Math.round((1-left/tot)*100);pCd=fmtCD(left);
+  let pPct=0, pCd='0:00', pSub='', pCc='', ptitle='', ptimeStr='', plabel='Now';
+  if (cur) {
+    const left=cur.e-nsSec, tot=cur.e-cur.s;
+    pPct=Math.round((1-left/tot)*100); pCd=fmtCD(left);
     pCc=left<120&&!isLunch(cur.p)?'urgent':isLunch(cur.p)?'lunch-color':'';
     pSub=isLunch(cur.p)?'lunch ends':'period ends';
-    ptitle=cur.p.name;ptimeStr=`${fmtTime(cur.p.start)} – ${fmtTime(cur.p.end)}`;plabel='Now';
-  }else if(nxt){
+    ptitle=cur.p.name; ptimeStr=`${fmtTime(cur.p.start)} – ${fmtTime(cur.p.end)}`; plabel='Now';
+  } else if (nxt) {
     const until=nxt.s-nsSec;
     const pe=(()=>{for(let i=periods.length-1;i>=0;i--){const e=toMins(periods[i].end)*60;if(nsSec>=e)return e;}return dayStart;})();
     const pd=nxt.s-pe;
-    pPct=pd>0?Math.round((1-until/pd)*100):0;pCd=fmtCD(until);pSub='until period starts';
-    ptitle=`Passing → ${nxt.p.name}`;ptimeStr=`${nxt.p.name} starts ${fmtTime(nxt.p.start)}`;plabel='Passing period';pCc='passing';
-  }else{
-    pCd=fmtCD(dayStart-nsSec);pSub='until start';ptitle=periods[0].name;ptimeStr=`starts ${fmtTime(periods[0].start)}`;plabel='Coming up';
+    pPct=pd>0?Math.round((1-until/pd)*100):0; pCd=fmtCD(until); pSub='until period starts';
+    ptitle=`Passing → ${nxt.p.name}`; ptimeStr=`${nxt.p.name} starts ${fmtTime(nxt.p.start)}`; plabel='Passing period'; pCc='passing';
+  } else {
+    pCd=fmtCD(dayStart-nsSec); pSub='until start'; ptitle=periods[0].name; ptimeStr=`starts ${fmtTime(periods[0].start)}`; plabel='Coming up';
   }
 
-  // custom timer
   const ctLeft=ctSecsLeft();
   let ctRing='';
-  if(ct.active&&ctLeft!==null){
+  if (ct.active&&ctLeft!==null) {
     const ctPct=ct.totalSecs>0?Math.round((1-ctLeft/ct.totalSecs)*100):100;
     const ctCc=ctLeft<30?'urgent':ctLeft<120?'lunch-color':'custom-timer';
     const ctDone=ctLeft===0&&!ct.paused;
-    if(ctDone&&!prevCtDone)playBell(2);
+    if (ctDone&&!prevCtDone) playBell(2);
     render._lastCtDone=ctDone;
     document.getElementById('ct-status').textContent=ct.paused?'Paused':ctDone?'⏰ Done!':'';
     ctRing=ringHTML(ctPct,fmtCD(ctLeft),ct.label,ct.paused?'paused':'remaining',ctCc,ringSize,sw,cdFs,pctFs,lblFs);
   }
 
   const titleColor=pCc==='urgent'?'#dc2626':pCc==='lunch-color'?'#f59e0b':pCc==='passing'?'#0891b2':'#4f46e5';
-  const projClockFz=Math.round(titleFs*1.3);
 
   area.innerHTML=simBanner+`<div class="timer-layout">
     <div class="proj-clock" style="font-size:${clockFs}px;margin-bottom:4px">${fmtClock(now)}</div>
@@ -567,120 +846,204 @@ function render(){
 }
 
 // ── Projector ─────────────────────────────────────────────────
-function toggleProjector(){projectorOn=!projectorOn;document.body.classList.toggle('projector',projectorOn);render();}
+function toggleProjector() { projectorOn=!projectorOn; document.body.classList.toggle('projector',projectorOn); render(); }
 
 // ── Custom timer ──────────────────────────────────────────────
-function toggleCtBar(){ctBarOpen=!ctBarOpen;document.getElementById('ct-bar').classList.toggle('hidden',!ctBarOpen);document.getElementById('ct-toggle-btn').classList.toggle('active-state',ctBarOpen);}
-function ctModeChange(){const m=document.getElementById('ct-mode').value;document.getElementById('ct-minutes').style.display=m==='minutes'?'':'none';document.getElementById('ct-endtime').style.display=m==='endtime'?'':'none';}
-function ctStart(){
-  const mode=document.getElementById('ct-mode').value,label=document.getElementById('ct-name').value.trim()||'Timer';
+function toggleCtBar() { ctBarOpen=!ctBarOpen; document.getElementById('ct-bar').classList.toggle('hidden',!ctBarOpen); document.getElementById('ct-toggle-btn').classList.toggle('active-state',ctBarOpen); }
+function ctModeChange() { const m=document.getElementById('ct-mode').value; document.getElementById('ct-minutes').style.display=m==='minutes'?'':'none'; document.getElementById('ct-endtime').style.display=m==='endtime'?'':'none'; }
+function ctStart() {
+  const mode=document.getElementById('ct-mode').value, label=document.getElementById('ct-name').value.trim()||'Timer';
   let secs;
-  if(mode==='minutes'){const m=parseFloat(document.getElementById('ct-minutes').value);if(!m||m<=0)return;secs=Math.round(m*60);}
-  else{const tv=document.getElementById('ct-endtime').value;if(!tv)return;const[h,mn]=tv.split(':').map(Number);const now=effectiveNow();const end=new Date(now);end.setHours(h,mn,0,0);if(end<=now)end.setDate(end.getDate()+1);secs=Math.round((end-now)/1000);}
+  if (mode==='minutes') { const m=parseFloat(document.getElementById('ct-minutes').value); if(!m||m<=0)return; secs=Math.round(m*60); }
+  else { const tv=document.getElementById('ct-endtime').value; if(!tv)return; const[h,mn]=tv.split(':').map(Number); const now=effectiveNow(); const end=new Date(now); end.setHours(h,mn,0,0); if(end<=now)end.setDate(end.getDate()+1); secs=Math.round((end-now)/1000); }
   ct={active:true,paused:false,endEpoch:Date.now()+secs*1000,pausedSecsLeft:null,totalSecs:secs,label};
-  document.getElementById('ct-pause-btn').style.display='';document.getElementById('ct-stop-btn').style.display='';document.getElementById('ct-status').textContent='';
+  document.getElementById('ct-pause-btn').style.display=''; document.getElementById('ct-stop-btn').style.display=''; document.getElementById('ct-status').textContent='';
 }
-function ctPause(){if(!ct.active)return;if(!ct.paused){ct.pausedSecsLeft=Math.max(0,Math.round((ct.endEpoch-Date.now())/1000));ct.paused=true;document.getElementById('ct-pause-btn').textContent='Resume';}else{ct.endEpoch=Date.now()+ct.pausedSecsLeft*1000;ct.paused=false;document.getElementById('ct-pause-btn').textContent='Pause';}}
-function ctStop(){ct={active:false,paused:false,endEpoch:null,pausedSecsLeft:null,totalSecs:null,label:''};document.getElementById('ct-pause-btn').style.display='none';document.getElementById('ct-stop-btn').style.display='none';document.getElementById('ct-pause-btn').textContent='Pause';document.getElementById('ct-status').textContent='';}
-function ctSecsLeft(){if(!ct.active)return null;if(ct.paused)return ct.pausedSecsLeft;return Math.max(0,Math.round((ct.endEpoch-Date.now())/1000));}
+function ctPause() { if(!ct.active)return; if(!ct.paused){ct.pausedSecsLeft=Math.max(0,Math.round((ct.endEpoch-Date.now())/1000));ct.paused=true;document.getElementById('ct-pause-btn').textContent='Resume';}else{ct.endEpoch=Date.now()+ct.pausedSecsLeft*1000;ct.paused=false;document.getElementById('ct-pause-btn').textContent='Pause';} }
+function ctStop() { ct={active:false,paused:false,endEpoch:null,pausedSecsLeft:null,totalSecs:null,label:''}; document.getElementById('ct-pause-btn').style.display='none'; document.getElementById('ct-stop-btn').style.display='none'; document.getElementById('ct-pause-btn').textContent='Pause'; document.getElementById('ct-status').textContent=''; }
+function ctSecsLeft() { if(!ct.active)return null; if(ct.paused)return ct.pausedSecsLeft; return Math.max(0,Math.round((ct.endEpoch-Date.now())/1000)); }
 
 // ── Setup Wizard ──────────────────────────────────────────────
-const TYPE_MAP={'regular week':'regular','monday holiday week':'monday_holiday','tuesday holiday week':'tuesday_holiday','friday holiday week':'friday_holiday','monday tuesday holiday week':'monday_tuesday_holiday','conference week':'conference','no school week':'noschool','last week of school':'last_week'};
-function normalizeType(raw){return TYPE_MAP[raw.trim().toLowerCase()]||raw.trim().toLowerCase().replace(/\s+/g,'_');}
-function parseWeekList(text){
+const TYPE_MAP={
+  'regular week':'regular','monday holiday week':'monday_holiday',
+  'tuesday holiday week':'tuesday_holiday','friday holiday week':'friday_holiday',
+  'monday tuesday holiday week':'monday_tuesday_holiday',
+  'conference week':'conference','no school week':'noschool','last week of school':'last_week'
+};
+function normalizeType(raw) { return TYPE_MAP[raw.trim().toLowerCase()]||raw.trim().toLowerCase().replace(/\s+/g,'_'); }
+
+function parseWeekList(text) {
   const res=[];
-  for(const line of text.split('\n').map(l=>l.trim()).filter(l=>l)){
-    if(/week of/i.test(line)&&/schedule/i.test(line))continue;
+  for (const line of text.split('\n').map(l=>l.trim()).filter(l=>l)) {
+    if (/week\s*(of|starting)/i.test(line)&&/schedule/i.test(line)) continue;
+    if (/week\s*starting/i.test(line)&&!/\d/.test(line)) continue;
     let parts=line.split('\t');
-    if(parts.length<2)parts=line.split(/\s{2,}/);
-    if(parts.length<2){const m=line.match(/^(\d+\/\d+\/\d+)\s+(.+)$/);if(m)parts=[m[1],m[2]];}
-    if(parts.length<2)continue;
-    const dm=parts[0].trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(!dm)continue;
-    let yr=parseInt(dm[3]);if(yr<100)yr+=2000;
+    if (parts.length<2) parts=line.split(/\s{2,}/);
+    if (parts.length<2) { const m=line.match(/^(\d+\/\d+\/\d+)\s+(.+)$/); if(m)parts=[m[1],m[2]]; }
+    if (parts.length<2) continue;
+    const dm=parts[0].trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(!dm)continue;
+    let yr=parseInt(dm[3]); if(yr<100)yr+=2000;
     const d=new Date(yr,parseInt(dm[1])-1,parseInt(dm[2]),12);
-    res.push({mondayStr:mondayOf(d),typeKey:normalizeType(parts.slice(1).join(' '))});
+    res.push({sundayStr:weekKey(d), typeKey:normalizeType(parts.slice(1).join(' '))});
   }
   return res;
 }
-function parseSchedulePaste(text){
+
+function parseSchedulePaste(text) {
   const byDay={0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
-  for(const line of text.split('\n').map(l=>l.trim()).filter(l=>l&&!/^period\s*name/i.test(l))){
+  for (const line of text.split('\n').map(l=>l.trim()).filter(l=>l&&!/^period\s*name/i.test(l))) {
     let parts=line.split('\t');
-    if(parts.length<4)parts=line.split(/\s{2,}/);
-    if(parts.length<4){const m=line.match(/^(.+?)\s+(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\s+(\d+:\d+\s*[AP]M)\s+(\d+:\d+\s*[AP]M)$/i);if(m)parts=[m[1],m[2],m[3],m[4]];}
-    if(parts.length<4)continue;
-    const di=DAY_LC.indexOf(parts[1].trim().toLowerCase());
-    if(di<0||di>6)continue;
-    const start=parse12h(parts[2]),end=parse12h(parts[3]);if(!start||!end)continue;
+    if (parts.length<4) parts=line.split(/\s{2,}/);
+    if (parts.length<4) { const m=line.match(/^(.+?)\s+(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\s+(\d+:\d+\s*[AP]M)\s+(\d+:\d+\s*[AP]M)$/i); if(m)parts=[m[1],m[2],m[3],m[4]]; }
+    if (parts.length<4) continue;
+    const di=DAY_LC.indexOf(parts[1].trim().toLowerCase()); if(di<0||di>6)continue;
+    const start=parse12h(parts[2]), end=parse12h(parts[3]); if(!start||!end)continue;
     const name=/^\d+$/.test(parts[0].trim())?`Period ${parts[0].trim()}`:parts[0].trim();
     byDay[di].push({name,start,end});
   }
   return byDay;
 }
-function openSetup(){
-  setupWeekList=weekList.map(w=>({...w}));
-  const seen=new Set();setupTypeKeys=[];
-  for(const w of setupWeekList)if(w.typeKey!=='noschool'&&!seen.has(w.typeKey)){seen.add(w.typeKey);setupTypeKeys.push(w.typeKey);}
-  setupTypeIdx=0;setupSchedBuf={};
-  for(const tk of setupTypeKeys)if(schedTypes[tk])setupSchedBuf[tk]=schedTypes[tk];
-  renderSetupStep(0);document.getElementById('setup-modal').style.display='flex';
+
+function resetToDefaults() {
+  if (!confirm('Reset all schedules and week list to FMS defaults? This cannot be undone.')) return;
+  loadDefaults();
+  weekOverride=null;
+  saveAll();
+  closeModal('setup-modal');
+  render();
 }
-function renderSetupStep(step){
-  const body=document.getElementById('setup-body'),footer=document.getElementById('setup-footer'),ind=document.getElementById('setup-step-ind');
-  if(step===0){
+
+function openSetup() {
+  setupWeekList=weekList.map(w=>({...w}));
+  const seen=new Set(); setupTypeKeys=[];
+  for (const w of setupWeekList) if(w.typeKey!=='noschool'&&!seen.has(w.typeKey)){seen.add(w.typeKey);setupTypeKeys.push(w.typeKey);}
+  setupTypeIdx=0; setupSchedBuf={};
+  for (const tk of setupTypeKeys) if(schedTypes[tk])setupSchedBuf[tk]=schedTypes[tk];
+  renderSetupStep(0);
+  document.getElementById('setup-modal').style.display='flex';
+}
+
+function renderSetupStep(step) {
+  const body=document.getElementById('setup-body'), footer=document.getElementById('setup-footer'), ind=document.getElementById('setup-step-ind');
+  if (step===0) {
     ind.textContent='Step 1';
-    body.innerHTML=`<p class="section-label">Paste your week list</p><div class="info-box">Two columns: date (M/D/YY) and schedule type, tab-separated.</div><textarea class="setup-textarea" id="wl-paste" placeholder="8/18/25&#9;Regular Week&#10;..."></textarea><div id="wl-msg"></div>`;
-    footer.innerHTML=`<button class="btn-secondary" onclick="closeModal('setup-modal')">Cancel</button><button class="btn-primary" onclick="wizNext()">Next →</button>`;
-    if(weekList.length)document.getElementById('wl-paste').value=weekList.map(w=>{const d=new Date(w.mondayStr+'T12:00:00');return `${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}\t${prettyType(w.typeKey)}`;}).join('\n');
-  }else{
+    body.innerHTML=`<p class="section-label">Paste your week list</p><div class="info-box">Two columns: date of the Sunday starting that week (M/D/YY) and schedule type, tab-separated.</div><textarea class="setup-textarea" id="wl-paste" placeholder="8/17/25&#9;Regular Week&#10;8/31/25&#9;Monday Holiday Week&#10;..."></textarea><div id="wl-msg"></div>`;
+    footer.innerHTML=`<button class="btn-danger" onclick="resetToDefaults()">Reset to defaults for FMS</button><button class="btn-secondary" onclick="closeModal('setup-modal')">Cancel</button><button class="btn-primary" onclick="wizNext()">Next →</button>`;
+    if (weekList.length) {
+      document.getElementById('wl-paste').value=weekList.map(w=>{
+        const str=w.sundayStr||w.mondayStr||'';
+        if (!str) return null;
+        const d=new Date(str+'T12:00:00');
+        return `${d.getUTCMonth()+1}/${d.getUTCDate()}/${String(d.getUTCFullYear()).slice(2)}\t${prettyType(w.typeKey)}`;
+      }).filter(Boolean).join('\n');
+    }
+  } else {
     const tk=setupTypeKeys[setupTypeIdx];
     ind.textContent=`Step ${setupTypeIdx+2} of ${setupTypeKeys.length+1}`;
     const pills=setupTypeKeys.map((k,i)=>`<span class="progress-step ${i<setupTypeIdx?'done':i===setupTypeIdx?'current':'pending'}">${prettyType(k)}</span>`).join('');
-    body.innerHTML=`<div class="progress-steps">${pills}</div><p style="font-size:15px;font-weight:600;margin-bottom:4px">${prettyType(tk)}</p><div class="info-box">Paste the full schedule. Format: Name, Day, Start, End (tab-separated). Bare numbers become Period N.</div><textarea class="setup-textarea" id="sc-paste"></textarea><div id="sc-msg"></div>`;
+    body.innerHTML=`<div class="progress-steps">${pills}</div><p style="font-size:15px;font-weight:600;margin-bottom:4px">${prettyType(tk)}</p><div class="info-box">Paste the full schedule for this week type. Format: Name, Day, Start, End (tab-separated). Bare numbers become Period N.</div><textarea class="setup-textarea" id="sc-paste"></textarea><div id="sc-msg"></div>`;
     const isLast=setupTypeIdx===setupTypeKeys.length-1;
     const nextFn=isLast?'wizFinish()':'wizNext()';
     const nextLbl=isLast?'Save &amp; Finish':'Next →';
     footer.innerHTML=`<button class="btn-secondary" onclick="wizBack()">← Back</button><div style="flex:1"></div><button class="btn-primary" onclick="${nextFn}">${nextLbl}</button>`;
-    if(setupSchedBuf[tk]){const lines=[];for(let di=0;di<5;di++)(setupSchedBuf[tk][di]||[]).forEach(p=>lines.push(`${p.name}\t${DAYS[di]}\t${fmt24to12(p.start)}\t${fmt24to12(p.end)}`));document.getElementById('sc-paste').value=lines.join('\n');}
+    if (setupSchedBuf[tk]) {
+      const lines=[];
+      for (let di=0;di<7;di++) (setupSchedBuf[tk][di]||[]).forEach(p=>lines.push(`${p.name}\t${DAYS[di]}\t${fmt24to12(p.start)}\t${fmt24to12(p.end)}`));
+      document.getElementById('sc-paste').value=lines.join('\n');
+    }
   }
 }
-function wizNext(){
-  if(document.getElementById('wl-paste')){
+
+function wizNext() {
+  if (document.getElementById('wl-paste')) {
     const parsed=parseWeekList(document.getElementById('wl-paste').value);
-    if(!parsed.length){document.getElementById('wl-msg').innerHTML='<p class="parse-error">No weeks parsed.</p>';return;}
-    setupWeekList=parsed;const seen=new Set();setupTypeKeys=[];
-    for(const w of parsed)if(w.typeKey!=='noschool'&&!seen.has(w.typeKey)){seen.add(w.typeKey);setupTypeKeys.push(w.typeKey);}
-    setupTypeIdx=0;setupSchedBuf={};
-    for(const tk of setupTypeKeys)if(schedTypes[tk])setupSchedBuf[tk]=schedTypes[tk];
-    if(!setupTypeKeys.length){finalizeSetup();return;}
-  }else{if(!bufferSched())return;setupTypeIdx++;}
+    if (!parsed.length){document.getElementById('wl-msg').innerHTML='<p class="parse-error">No weeks parsed.</p>';return;}
+    setupWeekList=parsed;
+    const seen=new Set(); setupTypeKeys=[];
+    for (const w of parsed) if(w.typeKey!=='noschool'&&!seen.has(w.typeKey)){seen.add(w.typeKey);setupTypeKeys.push(w.typeKey);}
+    setupTypeIdx=0; setupSchedBuf={};
+    for (const tk of setupTypeKeys) if(schedTypes[tk])setupSchedBuf[tk]=schedTypes[tk];
+    if (!setupTypeKeys.length){finalizeSetup();return;}
+  } else {
+    if (!bufferSched()) return;
+    setupTypeIdx++;
+  }
   renderSetupStep(1);
 }
-function wizBack(){if(setupTypeIdx>0){setupTypeIdx--;renderSetupStep(1);}else{setupTypeKeys=[];renderSetupStep(0);}}
-function wizFinish(){if(!bufferSched())return;finalizeSetup();}
-function bufferSched(){const r=parseSchedulePaste(document.getElementById('sc-paste').value);if(!Object.values(r).some(a=>a.length)){document.getElementById('sc-msg').innerHTML='<p class="parse-error">No periods parsed.</p>';return false;}setupSchedBuf[setupTypeKeys[setupTypeIdx]]=r;return true;}
-function finalizeSetup(){weekList=setupWeekList;for(const[k,v]of Object.entries(setupSchedBuf))schedTypes[k]=v;saveAll();closeModal('setup-modal');render();}
+function wizBack() { if(setupTypeIdx>0){setupTypeIdx--;renderSetupStep(1);}else{setupTypeKeys=[];renderSetupStep(0);} }
+function wizFinish() { if(!bufferSched())return; finalizeSetup(); }
+function bufferSched() {
+  const r=parseSchedulePaste(document.getElementById('sc-paste').value);
+  if (!Object.values(r).some(a=>a.length)){document.getElementById('sc-msg').innerHTML='<p class="parse-error">No periods parsed.</p>';return false;}
+  setupSchedBuf[setupTypeKeys[setupTypeIdx]]=r; return true;
+}
+function finalizeSetup() { weekList=setupWeekList; for(const[k,v]of Object.entries(setupSchedBuf))schedTypes[k]=v; saveAll(); closeModal('setup-modal'); render(); }
+
+// ── Day Override ──────────────────────────────────────────────
+let dayovBuf = [];
+function openDayOverride() {
+  const now = effectiveNow();
+  const vd = getViewDate(now);
+  // Default to viewed day
+  document.getElementById('dayov-date').value = vd.toISOString().slice(0,10);
+  const ds = vd.toISOString().slice(0,10);
+  dayovBuf = (dayOverrides[ds]||[]).map(p=>({...p}));
+  // If no override yet, pre-fill from current schedule
+  if (!dayovBuf.length) {
+    const existing = getScheduleForDay(vd.getDay(), vd);
+    dayovBuf = existing.map(p=>({...p}));
+  }
+  dayovRenderRows();
+  document.getElementById('dayov-modal').style.display='flex';
+}
+function dayovRenderRows() {
+  document.getElementById('dayov-rows').innerHTML = dayovBuf.map((p,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 110px 110px 28px;gap:6px;margin-bottom:6px;align-items:center">
+      <input style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;width:100%" type="text" placeholder="Period name" value="${p.name||''}" oninput="dayovBuf[${i}].name=this.value">
+      <input style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;width:100%" type="text" placeholder="9:30 AM" value="${p.start?fmt24to12(p.start):''}" onblur="dayovParseTime(${i},'start',this.value)">
+      <input style="padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;width:100%" type="text" placeholder="10:00 AM" value="${p.end?fmt24to12(p.end):''}" onblur="dayovParseTime(${i},'end',this.value)">
+      <button style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;line-height:1" onclick="dayovRemove(${i})">×</button>
+    </div>`).join('');
+}
+function dayovParseTime(i, field, val) {
+  const parsed = parse12h(val);
+  if (parsed) { dayovBuf[i][field] = parsed; }
+}
+function dayovAddRow() { dayovBuf.push({name:'',start:'',end:''}); dayovRenderRows(); }
+function dayovRemove(i) { dayovBuf.splice(i,1); dayovRenderRows(); }
+function dayovSave() {
+  const ds = document.getElementById('dayov-date').value;
+  if (!ds) return;
+  const valid = dayovBuf.filter(p=>p.name&&p.start&&p.end);
+  dayOverrides[ds] = valid;
+  saveAll(); closeModal('dayov-modal'); render();
+}
+function dayovClear() {
+  const ds = document.getElementById('dayov-date').value;
+  if (ds) delete dayOverrides[ds];
+  saveAll(); closeModal('dayov-modal'); render();
+}
 
 // ── Override ──────────────────────────────────────────────────
-function openOverride(){
+function openOverride() {
   selOverrideTpl=weekOverride?weekOverride.typeKey:null;
   const types=[...new Set(weekList.map(w=>w.typeKey).filter(k=>k!=='noschool'))];
   document.getElementById('override-grid').innerHTML=types.map(k=>`<div class="tpl-card${selOverrideTpl===k?' selected':''}" onclick="pickOverride('${k}',this)"><h4>${prettyType(k)}</h4></div>`).join('');
   document.getElementById('override-modal').style.display='flex';
 }
-function pickOverride(k,el){selOverrideTpl=k;document.querySelectorAll('#override-grid .tpl-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
-function saveOverride(){if(!selOverrideTpl)return;weekOverride={mondayStr:mondayOf(effectiveNow()),typeKey:selOverrideTpl};saveAll();closeModal('override-modal');render();}
-function clearOverride(){weekOverride=null;saveAll();closeModal('override-modal');render();}
+function pickOverride(k,el) { selOverrideTpl=k; document.querySelectorAll('#override-grid .tpl-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); }
+function saveOverride() { if(!selOverrideTpl)return; weekOverride={sundayStr:weekKey(effectiveNow()),typeKey:selOverrideTpl}; saveAll(); closeModal('override-modal'); render(); }
+function clearOverride() { weekOverride=null; saveAll(); closeModal('override-modal'); render(); }
 
 // ── Simulate ──────────────────────────────────────────────────
-function openSim(){const n=effectiveNow();document.getElementById('sim-date').value=n.toISOString().slice(0,10);document.getElementById('sim-time').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;document.getElementById('sim-modal').style.display='flex';}
-function saveSim(){const dv=document.getElementById('sim-date').value,tv=document.getElementById('sim-time').value;if(!dv||!tv){closeModal('sim-modal');return;}const[sh,sm]=tv.split(':').map(Number);const sd=new Date(dv+'T00:00:00');sd.setHours(sh,sm,0,0);simOffset=sd.getTime()-Date.now();viewDay=sd.getDay();closeModal('sim-modal');render();}
-function clearSim(){simOffset=null;viewDay=new Date().getDay();closeModal('sim-modal');render();}
-function closeModal(id){document.getElementById(id).style.display='none';}
+function openSim() { const n=effectiveNow(); document.getElementById('sim-date').value=n.toISOString().slice(0,10); document.getElementById('sim-time').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; document.getElementById('sim-modal').style.display='flex'; }
+function saveSim() { const dv=document.getElementById('sim-date').value,tv=document.getElementById('sim-time').value; if(!dv||!tv){closeModal('sim-modal');return;} const[sh,sm]=tv.split(':').map(Number); const sd=new Date(dv+'T00:00:00'); sd.setHours(sh,sm,0,0); simOffset=sd.getTime()-Date.now(); viewDay=sd.getDay(); closeModal('sim-modal'); render(); }
+function clearSim() { simOffset=null; viewDay=new Date().getDay(); closeModal('sim-modal'); render(); }
+function closeModal(id) { document.getElementById(id).style.display='none'; }
 
 document.querySelectorAll('.day-btn').forEach(b=>b.addEventListener('click',()=>{viewDay=+b.dataset.day;render();}));
 loadAll();
-viewDay=new Date().getDay(); // 0=Sun..6=Sat
+viewDay=new Date().getDay();
 render();
 setInterval(render,1000);
 new ResizeObserver(render).observe(document.body);
