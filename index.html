@@ -238,7 +238,14 @@ const DST={
   conference:`1\tMonday\t9:30 AM\t10:48 AM\n2\tMonday\t10:53 AM\t12:11 PM\nLunch\tMonday\t12:16 PM\t12:52 PM\n3\tMonday\t12:57 PM\t2:15 PM\n4\tTuesday\t9:30 AM\t10:48 AM\n5\tTuesday\t10:53 AM\t12:11 PM\nLunch\tTuesday\t12:16 PM\t12:52 PM\n6\tTuesday\t12:57 PM\t2:15 PM\n7\tWednesday\t9:30 AM\t10:48 AM\n1\tWednesday\t10:53 AM\t12:11 PM\nLunch\tWednesday\t12:16 PM\t12:52 PM\nAdvisory\tWednesday\t12:57 PM\t2:15 PM\n2\tThursday\t9:30 AM\t10:48 AM\n3\tThursday\t10:53 AM\t12:11 PM\nLunch\tThursday\t12:16 PM\t12:52 PM\n4\tThursday\t12:57 PM\t2:15 PM\n5\tFriday\t9:30 AM\t10:48 AM\n6\tFriday\t10:53 AM\t12:11 PM\nLunch\tFriday\t12:16 PM\t12:52 PM\n7\tFriday\t12:57 PM\t2:15 PM`,
   last_week:`1\tMonday\t9:30 AM\t10:25 AM\n2\tMonday\t10:30 AM\t11:25 AM\n3\tMonday\t11:30 AM\t12:25 PM\nLunch\tMonday\t12:30 PM\t1:15 PM\n4\tMonday\t1:20 PM\t2:15 PM\n5\tMonday\t2:20 PM\t3:15 PM\nAdvisory\tMonday\t3:20 PM\t4:00 PM\n6\tTuesday\t9:30 AM\t10:25 AM\n7\tTuesday\t10:30 AM\t11:25 AM\n1\tTuesday\t11:30 AM\t12:25 PM\nLunch\tTuesday\t12:30 PM\t1:15 PM\n2\tTuesday\t1:20 PM\t2:15 PM\n3\tTuesday\t2:20 PM\t3:15 PM\nAdvisory\tTuesday\t3:20 PM\t4:00 PM\n4\tWednesday\t9:30 AM\t10:25 AM\n5\tWednesday\t10:30 AM\t11:25 AM\n6\tWednesday\t11:30 AM\t12:25 PM\nLunch\tWednesday\t12:30 PM\t1:15 PM\n7\tWednesday\t1:20 PM\t2:15 PM`
 };
-function loadDefaults(){weekList=parseWeekList(DWL);schedTypes={};for(const[k,v]of Object.entries(DST))schedTypes[k]=parseSchedulePaste(v);}
+function loadDefaults(){
+  weekList=parseWeekList(DWL);
+  schedTypes={};
+  for(const[k,v]of Object.entries(DST)){
+    const parsed=parseSchedulePaste(v);
+    schedTypes[k]=parsed;
+  }
+}
 
 // ── Persistence ───────────────────────────────────────────────
 function saveAll(){try{localStorage.setItem(SK_W,JSON.stringify(weekList));localStorage.setItem(SK_S,JSON.stringify(schedTypes));localStorage.setItem(SK_O,JSON.stringify(weekOverride));}catch(e){}}
@@ -269,20 +276,25 @@ function parse12h(s){const m=s.trim().match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)retu
 function fmt24to12(t){const[h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
 function prettyType(tk){if(!tk)return'';return tk.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 function getTypeForDate(date){const ms=mondayOf(date);if(weekOverride&&weekOverride.mondayStr===ms)return weekOverride.typeKey;const e=weekList.find(w=>w.mondayStr===ms);return e?e.typeKey:null;}
-function weekdayIdx(di){return di-1;} // convert Sun=0..Sat=6 to Mon=0..Fri=4 (returns -1 for Sun, 5 for Sat)
+function weekdayIdx(di){return di;} // di is already 0=Sun..6=Sat matching getDay()
 function getScheduleForDay(di,date){
-  if(di===0||di===6)return[]; // weekend
+  if(di===0||di===6){
+    // Check if a custom schedule exists for this weekend day
+    const tk=getTypeForDate(date);
+    if(!tk||tk==='noschool')return[];
+    const td=schedTypes[tk];if(!td)return[];
+    return td[di]||[];
+  }
   const tk=getTypeForDate(date);
   if(!tk||tk==='noschool')return[];
   const td=schedTypes[tk];if(!td)return[];
-  return td[weekdayIdx(di)]||[];
+  return td[di]||[];
 }
 function isNoSchoolDay(di,date){
-  if(di===0||di===6)return true;
   const tk=getTypeForDate(date);
   if(!tk)return false;if(tk==='noschool')return true;
-  const td=schedTypes[tk];if(!td)return false;
-  return!td[weekdayIdx(di)]||td[weekdayIdx(di)].length===0;
+  const td=schedTypes[tk];if(!td)return true;
+  return!td[di]||td[di].length===0;
 }
 
 // ── Bell ──────────────────────────────────────────────────────
@@ -591,13 +603,14 @@ function parseWeekList(text){
   return res;
 }
 function parseSchedulePaste(text){
-  const byDay={0:[],1:[],2:[],3:[],4:[]};
+  const byDay={0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
   for(const line of text.split('\n').map(l=>l.trim()).filter(l=>l&&!/^period\s*name/i.test(l))){
     let parts=line.split('\t');
     if(parts.length<4)parts=line.split(/\s{2,}/);
-    if(parts.length<4){const m=line.match(/^(.+?)\s+(Monday|Tuesday|Wednesday|Thursday|Friday)\s+(\d+:\d+\s*[AP]M)\s+(\d+:\d+\s*[AP]M)$/i);if(m)parts=[m[1],m[2],m[3],m[4]];}
+    if(parts.length<4){const m=line.match(/^(.+?)\s+(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\s+(\d+:\d+\s*[AP]M)\s+(\d+:\d+\s*[AP]M)$/i);if(m)parts=[m[1],m[2],m[3],m[4]];}
     if(parts.length<4)continue;
-    const di=DAY_LC.indexOf(parts[1].trim().toLowerCase())-1;if(di<0||di>4)continue;
+    const di=DAY_LC.indexOf(parts[1].trim().toLowerCase());
+    if(di<0||di>6)continue;
     const start=parse12h(parts[2]),end=parse12h(parts[3]);if(!start||!end)continue;
     const name=/^\d+$/.test(parts[0].trim())?`Period ${parts[0].trim()}`:parts[0].trim();
     byDay[di].push({name,start,end});
