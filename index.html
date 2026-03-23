@@ -658,20 +658,22 @@ function dayRingHTML(periods, nsSec, dayStart, dayEnd, sz, sw, cdFs, pctFs, lblF
   }
   const dotFrac=elapsed/total, dotAngle=dotFrac*2*Math.PI-Math.PI/2;
   arcs+=`<circle fill="${projectorOn?'#fff':'#1a1a1a'}" cx="${(cx+r*Math.cos(dotAngle)).toFixed(2)}" cy="${(cy+r*Math.sin(dotAngle)).toFixed(2)}" r="${(sw/2+1).toFixed(1)}"/>`;
-  const lgd=[{c:clr.class,l:'Class'},{c:clr.passing,l:'Passing'},{c:clr.lunch,l:'Lunch'}];
-  const legend=`<div style="display:flex;gap:8px;justify-content:center;margin-top:4px">${lgd.map(l=>`<span style="font-size:${Math.max(9,lblFs-1)}px;color:${projectorOn?'#555':'#aaa'};display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.c}"></span>${l.l}</span>`).join('')}</div>`;
-  return `<div class="ring-block">
-    <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;text-align:center">School day</div>
-    <div class="ring-wrap" style="width:${sz}px;height:${sz}px">
-      <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">${arcs}</svg>
-      <div class="ring-center">
-        <div class="ring-cd day-color" style="font-size:${cdFs}px">${dayCd}</div>
-        <div style="font-size:${pctFs}px;color:#aaa;margin-top:2px">${dayPct}%</div>
+  // Return legend separately so caller can place it outside the rings-row
+  const legend=`<div style="display:flex;gap:8px;justify-content:center;margin-top:6px">${[{c:clr.class,l:'Class'},{c:clr.passing,l:'Passing'},{c:clr.lunch,l:'Lunch'}].map(l=>`<span style="font-size:${Math.max(9,lblFs-1)}px;color:${projectorOn?'#555':'#aaa'};display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.c}"></span>${l.l}</span>`).join('')}</div>`;
+  return {
+    ring: `<div class="ring-block">
+      <div style="font-size:${lblFs}px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em;text-align:center">School day</div>
+      <div class="ring-wrap" style="width:${sz}px;height:${sz}px">
+        <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">${arcs}</svg>
+        <div class="ring-center">
+          <div class="ring-cd day-color" style="font-size:${cdFs}px">${dayCd}</div>
+          <div style="font-size:${pctFs}px;color:#aaa;margin-top:2px">${dayPct}%</div>
+        </div>
       </div>
-    </div>
-    <div style="font-size:${lblFs}px;color:#aaa;text-align:center">day remaining</div>
-    ${legend}
-  </div>`;
+      <div style="font-size:${lblFs}px;color:#aaa;text-align:center">day remaining</div>
+    </div>`,
+    legend
+  };
 }
 
 // ── Main render ───────────────────────────────────────────────
@@ -829,6 +831,8 @@ function render() {
     ctRing=ringHTML(ctPct,fmtCD(ctLeft),ct.label,ct.paused?'paused':'remaining',ctCc,ringSize,sw,cdFs,pctFs,lblFs);
   }
 
+  const dayRing = dayRingHTML(periods,nsSec,dayStart,dayEnd,ringSize,sw,cdFs,pctFs,lblFs);
+
   const titleColor=pCc==='urgent'?'#dc2626':pCc==='lunch-color'?'#f59e0b':pCc==='passing'?'#0891b2':'#4f46e5';
 
   area.innerHTML=simBanner+`<div class="timer-layout">
@@ -839,8 +843,9 @@ function render() {
     <div class="rings-row" style="flex-direction:${ringsFlexDir}">
       ${ctRing}
       ${ringHTML(pPct,pCd,cur?'Current period':nxt?'Passing period':'Coming up',pSub,pCc,ringSize,sw,cdFs,pctFs,lblFs)}
-      ${dayRingHTML(periods,nsSec,dayStart,dayEnd,ringSize,sw,cdFs,pctFs,lblFs)}
+      ${dayRing.ring}
     </div>
+    ${dayRing.legend}
     ${cur&&nxt?`<div class="next-up">Up next: <strong>${nxt.p.name}</strong> at ${fmtTime(nxt.p.start)}</div>`:''}
   </div>`;
 }
